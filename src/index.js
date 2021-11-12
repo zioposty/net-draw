@@ -1,13 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import GraphGen from './graph_manager/graph_gen';
 import reportWebVitals from './reportWebVitals';
+import { Node } from 'react-d3-graph';
+
+
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <GraphGen/>,
   document.getElementById('root')
 );
 

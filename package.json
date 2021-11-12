@@ -3,13 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.5.0",
+    "@emotion/styled": "^11.3.0",
+    "@material-ui/core": "^5.0.0-beta.5",
+    "@mui/material": "^5.1.0",
     "@testing-library/jest-dom": "^5.15.0",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
+    "d3": "^5.5.0",
+    "material-ui-color-picker": "^3.5.1",
     "react": "^17.0.2",
+    "react-confirm-alert": "^2.7.0",
+    "react-d3-graph": "^2.6.0",
     "react-dom": "^17.0.2",
+    "react-motion": "^0.5.2",
     "react-scripts": "4.0.3",
     "web-vitals": "^1.1.2"
+
+    
   },
   "scripts": {
     "start": "react-scripts start",
@@ -34,5 +45,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.34",
+    "@types/react-d3-graph": "^2.6.1"
   }
 }
