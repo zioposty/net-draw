@@ -17,6 +17,8 @@ import Button from '@mui/material/Button';
 // General configuration of nodes
 import config from "./network-config";
 import { NodeContextMenu, LinkContextMenu } from './context';
+import { event } from 'd3';
+import { breakpoints } from '@mui/system';
 
 
 
@@ -117,7 +119,7 @@ class GraphGen extends React.Component {
   }
 
   onClickNode = (nodeId) => {
-    console.log("Clicked on " + nodeId);
+    console.log(this.state.nodes.find(n => n.id == nodeId));
 
     if (this.state.breakPoints.length == 0) {
       data.focusedNodeId = nodeId;
@@ -157,25 +159,48 @@ class GraphGen extends React.Component {
     link.click();
   };
 
-  removeNode = (node) => {
+  removeNode = (nodeId) => {
+    let idx = this.state.nodes.findIndex(n => n.id == nodeId);
+    let node = this.state.nodes[idx];
+    if( !node.fake && this.state.breakPoints.length>0)
+    {
+      window.alert("Editing a link, can't remove Nodes")
+      return;
+    }
+    
+    if( node.fake ) {
+      //remove node
+      console.log("START")
+      console.log(this.state.breakPoints.splice(nodeId, 1));
+      console.log("To Delete breakpoint " + nodeId);
+      console.log(this.state.nodes.splice(idx, 1));
+      console.log(this.state.nodes)
+      console.log(this.state.breakPoints);
+
+      this.setState({breakpoints: this.state.breakPoints,
+                   nodes: this.state.nodes,
+                   })
+      return;
+    }
+
     confirmAlert({
       customUI: ({ onClose }) => {
         return (
           <div className='custom-ui'>
             <h1>Are you sure?</h1>
-            <p>You want to delete node "{node}"?</p>
+            <p>You want to delete node "{nodeId}"?</p>
             <button onClick={onClose}>No</button>
             <button
               onClick={() => {
                 for (var i = 0; i < this.state.nodes.length; i++) {
-                  if (this.state.nodes[i].id === node) {
+                  if (this.state.nodes[i].id === nodeId) {
                     this.state.nodes.splice(i, 1)
                     break;
                   }
                 }
 
                 for (var i = 0; i < this.state.links.length; i++) {
-                  if (this.state.links[i].source === node || this.state.links[i].target === node) {
+                  if (this.state.links[i].source === nodeId || this.state.links[i].target === nodeId) {
                     this.state.links.splice(i, 1);
                     i--;
                   }
@@ -224,20 +249,29 @@ class GraphGen extends React.Component {
     nodes[idx].x = x;
     nodes[idx].y = y;
 
+    if ( nodes[idx].fake ){
+      let fake = this.state.breakPoints[Number.parseInt(nodes[idx].id)];
+      fake.x = x;
+      fake.y = y;
+    } 
+    this.setState( {nodes: nodes});
     console.log(nodes[idx]);
   }
 
   updateNodeName = (value, old_val) => {
-    if (Number.isInteger(value)) return;
+    
+    if ( !isNaN(Number(value))){
+      window.alert("Not a valid name");
+      return;
+    }
     console.log(this.state.nodes);
-
     const idx = this.state.nodes.findIndex(node => node.id === value)
     console.log(idx);
     if (idx == -1) {
 
       const idx = this.state.nodes.findIndex(node => node.id === old_val);
-      this.state.nodes[idx].id = value;
 
+      this.state.nodes[idx].id = value;
       this.state.links.forEach(link => {
         if (link.source === old_val) { link.source = value; }
         else if (link.target === old_val) { link.target = value; }
@@ -272,7 +306,7 @@ class GraphGen extends React.Component {
       fake: true, size: 50
     });
     this.state.breakPoints.push({ x: canvas_x, y: canvas_y })
-
+    console.log(this.state.breakPoints)
     this.setState({ breakPoints: this.state.breakPoints });
     console.log(this.state.breakPoints);
 
@@ -349,8 +383,9 @@ class GraphGen extends React.Component {
         x: fakeNode.x, y: fakeNode.y,
       })
       count++
-    }
-    )
+    });
+
+    
   }
 
   render() {
