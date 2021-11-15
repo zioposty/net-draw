@@ -78,6 +78,100 @@ class NodeMenu extends React.Component {
     }
 }
 
+class BlockMenu extends React.Component {
+    constructor(props) {
+        super(props)
+
+        this.state = {
+            value: props.block,
+            size: { width: props.size.width, height: props.size.height }
+        }
+        console.log(props.size)
+        this.handleChange = this.handleChange.bind(this);
+        this.handleChangeH = this.handleChangeH.bind(this);
+        this.handleChangeW = this.handleChangeW.bind(this);
+    }
+
+    handleChange(event) {
+        this.setState({ value: event.target.value });
+    }
+
+    handleChangeH(event) {
+        let h = event.target.value;
+        
+        h = (Number.isInteger(h) && h>0)? h : this.state.size.height
+
+        this.setState({
+            size: {
+                height: h
+            }
+        });
+    }
+
+    handleChangeW(event) {
+        let w = event.target.value;
+        
+        w = (Number.isInteger(w) && w>0)? w : this.state.size.width
+
+        this.setState({
+            size: {
+                width: w
+            }
+        });
+    }
+
+    render() {
+        return (
+            <div>
+                <form onSubmit={(event) => { event.preventDefault(); console.log(this.state); this.props.updateNodeName(this.state.value, this.props.block) }}>
+                    <h1>{this.props.block}</h1>
+                    <Stack spacing={1} direction="row">
+                        <TextField id="block-new-name" label="New Name" variant="outlined" onChange={this.handleChange} />
+                        <Button type="submit" variant='outlined'> Rename </Button>
+                    </Stack>
+
+                </form>
+
+                <Button onClick={this.props.removeNode} style={{ marginTop: 5 }} variant='outlined'> Remove Node</Button>
+
+                <div style={{ marginTop: "5%" }}>
+                    <Stack spacing={1} direction="row">
+
+                        <ColorPicker
+                            name='color'
+                            value={this.props.color}
+                            onChange={(color) => this.props.onChangeColor(color)}
+                            TextFieldProps={{
+                                value: this.props.color,
+                                label: "Border Color",
+                                InputProps: {
+                                    readOnly: true,
+                                }
+                            }}
+                        />
+
+                        <Button variant='outlined' onClick={(event) => { event.preventDefault(); this.props.applyColor(this.props.color, this.props.block) }} > Confirm </Button>
+
+
+                    </Stack>
+                </div>
+
+                <div style={{ marginTop: "5%" }}>
+
+                    <form onSubmit={(event) => { event.preventDefault(); console.log(this.state); this.props.updateBlockSize(this.state.size, this.props.block) }}>
+                        <Stack spacing={1} direction="row">
+                            <TextField type="number" defaultValue={this.state.size.height} id="block-new-height" label="Height" variant="outlined" onChange={this.handleChangeH} />
+                            <TextField type="number" defaultValue={this.state.size.width} id="block-new-width" label="Width" variant="outlined" onChange={this.handleChangeW} />
+                            <Button type="submit" variant='outlined'> Resize</Button>
+                        </Stack>
+                    </form>
+
+                </div>
+            </div>
+        )
+    }
+}
+
 class LinkMenu extends React.Component {
     constructor(props) {
         super(props)
@@ -147,11 +241,11 @@ class LinkMenu extends React.Component {
                                 label: "Link Color",
                                 InputProps: {
                                     readOnly: true,
-                                  }
+                                }
                             }}
                         />
 
-                        <Button variant='outlined' onClick={(event) => {event.preventDefault(); this.props.applyColor(this.props.color, this.props.link)}} > Confirm </Button>
+                        <Button variant='outlined' onClick={(event) => { event.preventDefault(); this.props.applyColor(this.props.color, this.props.link) }} > Confirm </Button>
 
 
                     </Stack>
@@ -162,4 +256,4 @@ class LinkMenu extends React.Component {
     }
 }
 
-export { NodeMenu, LinkMenu };
+export { NodeMenu, LinkMenu, BlockMenu };

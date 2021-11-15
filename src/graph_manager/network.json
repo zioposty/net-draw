@@ -1,1 +1,23 @@
-{"nodes":[{"id":"Pc0","x":130,"y":164,"svg":"./assets/pc.svg","device":"PC","fake":false},{"id":"PC462","svg":"./assets/pc.svg","device":"PC","x":29.398487091064453,"y":30,"highlightStrokeColor":"blue","fake":false}],"links":[],"focusedNodeId":"Pc0"}
+{
+    "nodes": [
+        {
+            "id": "Pc0",
+            "x": 130,
+            "y": 164,
+            "svg": "./assets/pc.svg",
+            "device": "PC",
+            "fake": false
+        },
+        {
+            "id": "PC462",
+            "svg": "./assets/pc.svg",
+            "device": "PC",
+            "x": 29.398487091064453,
+            "y": 30,
+            "highlightStrokeColor": "blue",
+            "fake": false
+        }
+    ],
+    "links": [],
+    "focusedNodeId": "Pc0"
+}
