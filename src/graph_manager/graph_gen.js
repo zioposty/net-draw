@@ -17,8 +17,8 @@ import Button from '@mui/material/Button';
 // General configuration of nodes
 import config from "./network-config";
 import { NodeContextMenu, LinkContextMenu } from './context';
-import { event } from 'd3';
-import { breakpoints } from '@mui/system';
+
+import ImgTabs from './imageTab/imageTab';
 
 
 
@@ -47,11 +47,11 @@ class GraphGen extends React.Component {
   }
 
   onDoubleClickNode(node) {
-  
-    let n = this.state.nodes.find( n => n.id == node);
 
-    if(n.isFake || n.isBlock) return
-    
+    let n = this.state.nodes.find(n => n.id == node);
+
+    if (n.isFake || n.isBlock) return
+
     data.focusedNodeId = null;
     if (this.state.new_link === null) {
       this.setState({
@@ -365,7 +365,7 @@ class GraphGen extends React.Component {
 
 
   applyColorBlock = (color, block) => {
-    
+
     const regex = new RegExp('/^#([0-9A-F]{3}){1,2}$/i');
 
     if (!regex.test(color)) {
@@ -384,7 +384,7 @@ class GraphGen extends React.Component {
       nodes: nodes,
     })
   }
- 
+
   showBreakPoints = (link) => {
     console.log(link)
     let { source, target } = link;
@@ -414,10 +414,11 @@ class GraphGen extends React.Component {
   }
 
 
-  createBlock = () => {
+  createBlock = (blockType, blockImg) => {
     let block = BLOCK;
-    block.size = { height: 3000, width: 200}
-    block.id = "Block" + Math.floor(Math.random() * 10000)
+    block.id = blockType + Math.floor(Math.random() * 10000)
+    block.svg = blockImg
+
     this.state.nodes.unshift(block)
     this.setState({
       nodes: this.state.nodes
@@ -463,7 +464,7 @@ class GraphGen extends React.Component {
             color={this.state.temp_link_color}
             onChangeColor={this.onChangeColor}
             applyColor={this.applyColorBlock}
-            size={ this.state.nodes.find(n => n.id === this.state.node_selected).size}
+            size={this.state.nodes.find(n => n.id === this.state.node_selected).size}
           />
         </div>
       }
@@ -486,14 +487,17 @@ class GraphGen extends React.Component {
     return (
       <div>
         <div style={{ float: "left", width: "30%" }}>
-          <div>
+       {/*    <div>
             <Button variant="outlined" id="add_router" onClick={() => this.createNode(ROUTER_ICON, ROUTER)}> Add Router </Button>
             <Button variant="outlined" id="add_pc" onClick={() => this.createNode(PC_ICON, PC)}> Add PC </Button>
             <Button variant="outlined" id="add_block" onClick={() => this.createBlock()}> Add Block </Button>
-
-          </div>
+          </div> */}
           <Button variant="outlined" id="save" onClick={this.saveNetwork}>Save Network </Button>
 
+          <ImgTabs 
+          createNode={this.createNode}
+          createBlock={this.createBlock}/>
+          
           <>
             {context}
           </>
