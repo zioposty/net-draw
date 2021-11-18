@@ -241,17 +241,21 @@ class GraphGen extends React.Component {
 			fx = Math.round(fx / 20.0) * 20 //+ (10 - nodes[idx].size.height / 20); //10 - n.size.height/20)
 			fy = Math.round(fy / 20.0) * 20 //+ (10 - nodes[idx].size.width / 20);
 		}
-		
+
 		nodes[idx].fx = fx;
 		nodes[idx].fy = fy;
+		nodes[idx].x = fx;
+		nodes[idx].y = fy;
+
 
 		if (nodes[idx].isFake) {
 			let fake = this.state.breakPoints[Number.parseInt(nodes[idx].id)];
 			fake.x = fx;
 			fake.y = fy;
+			fake.fx = fx;
+			fake.fy = fy
 		}
 		this.setState({ nodes: nodes });
-		console.log(nodes[idx]);
 	}
 
 	updateNodeName = (value, old_val) => {
@@ -275,8 +279,8 @@ class GraphGen extends React.Component {
 			)
 
 			this.setState({
-				node_selected: "",
-				menu: false
+				nodes: this.state.nodes,
+				node_selected: value
 			});
 
 		}
@@ -306,10 +310,11 @@ class GraphGen extends React.Component {
 
 		this.state.nodes.push({
 			id: this.state.breakPoints.length,
+			x: canvas_x, y: canvas_y,
 			fx: canvas_x, fy: canvas_y,
 			isFake: true, svg: FAKE_ICON, size: { height: 50, width: 50 },
 		});
-		this.state.breakPoints.push({ x: canvas_x, y: canvas_y })
+		this.state.breakPoints.push({ x: canvas_x, y: canvas_y, fx: canvas_x, fy: canvas_y, })
 		console.log("BREAKPOINTS")
 		console.log(this.state.nodes)
 		this.setState({ breakPoints: this.state.breakPoints });
@@ -403,14 +408,17 @@ class GraphGen extends React.Component {
 			this.state.nodes.push({
 				id: count,
 				fx: fakeNode.x, fy: fakeNode.y,
+				x: fakeNode.x, y: fakeNode.y,
 				isFake: true, svg: FAKE_ICON,
 				size: {
 					height: 50,
 					width: 50
 				},
 			});
+
 			this.state.breakPoints.push({
 				fx: fakeNode.x, fy: fakeNode.y,
+				x: fakeNode.x, y: fakeNode.y,
 			})
 			count++
 		});
@@ -480,14 +488,46 @@ class GraphGen extends React.Component {
 			n => {
 				n.fx = Math.round(n.fx / 20.0) * 20 //- (10 - n.size.height / 20)
 				n.fy = Math.round(n.fy / 20.0) * 20 //- (10 - n.size.height / 20)
+				n.x = Math.round(n.x / 20.0) * 20
+				n.y = Math.round(n.y / 20.0) * 20
+			}
+		)
+
+		console.log(nodes)
+		let links = this.state.links
+
+		links.forEach(
+			l => {
+				l.breakPoints.forEach(
+					n => {
+						n.x = Math.round(n.x / 20.0) * 20
+						n.y = Math.round(n.y / 20.0) * 20
+						n.fx = Math.round(n.x / 20.0) * 20
+						n.fy = Math.round(n.y / 20.0) * 20
+					}
+				)
+			}
+		)
+
+		let fakes = this.state.breakPoints
+
+		fakes.forEach(
+			n => {
+				n.fx = Math.round(n.fx / 20.0) * 20 //- (10 - n.size.height / 20)
+				n.fy = Math.round(n.fy / 20.0) * 20 //- (10 - n.size.height / 20)
+				n.x = Math.round(n.x / 20.0) * 20
+				n.y = Math.round(n.y / 20.0) * 20
 			}
 		)
 
 		this.setState({
 			nodes: nodes,
+			links: links,
+			breakPoints: fakes,
 			refactor: true,
 		})
 
+		console.log(this.state)
 	}
 
 	onChangeDirected = (directed, link) => {
@@ -509,7 +549,6 @@ class GraphGen extends React.Component {
 
 	componentDidMount() {
 
-		console.log("IM HERE1")
 		this.state.links.forEach(
 			link => {
 				if (link.directed != null) {
@@ -522,7 +561,6 @@ class GraphGen extends React.Component {
 	}
 
 	componentDidUpdate() {
-		console.log("IM HERE2")
 
 		this.state.links.forEach(
 			link => {
@@ -536,6 +574,11 @@ class GraphGen extends React.Component {
 	}
 
 
+	testt(id) {
+		let n = this.state.nodes.find(n => n.id === id);
+		console.log(id)
+		return n
+	}
 
 	render() {
 
@@ -572,13 +615,14 @@ class GraphGen extends React.Component {
 					<BlockMenu
 						updateNodeName={this.updateNodeName}
 						removeNode={() => this.removeNode(this.state.node_selected)}
-						block={this.state.nodes.find(n => n.id === this.state.node_selected)}
+						block={this.testt(this.state.node_selected)}
 						size={this.state.nodes.find(n => n.id === this.state.node_selected).size}
 						updateBlockSize={(size) => {
 							console.log(size);
-							let idx = this.state.nodes.findIndex(n => n.id = this.state.node_selected);
+							console.log(this.state)
+							let idx = this.state.nodes.findIndex(n => n.id == this.state.node_selected);
 							this.state.nodes[idx].size = size;
-							this.setState({ nodes: this.state.nodes })
+							this.setState({ nodes: this.state.nodes})
 						}
 						}
 					/>
