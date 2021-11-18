@@ -3,20 +3,27 @@ import * as React from 'react';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 
-import { ROUTER, PC, PC_ICON, ROUTER_ICON } from '../constants';
+import { ROUTER, PC, PC_ICON, ROUTER_ICON, SERVER_ICON, SERVER } from '../constants';
 
 export default function DeviceImageList(props) {
     return (
         <ImageList sx={{ width: 500, height: 200 }} cols={3}>
             {deviceData.map((device) => (
-                <ImageListItem key={device.img} style={{height: '90px', width: '120px'}}>
-                    <img style={{height: '90px', width: '130px'}}
+                <ImageListItem key={device.img} style={{ height: '120px', width: '70px' }}>
+                    <img style={{
+                        position: "absolute",
+                        margin: "auto",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                    }}
                         src={device.img}
                         srcSet={device.img}
                         alt={device.title}
                         loading="lazy"
                         onClick={(event) => props.createNode(device.img, device.title)}
-                        
+
                     />
                     {/* <ImageListItemBar
                         title={device.title}
@@ -38,20 +45,7 @@ const deviceData = [
         title: ROUTER,
     },
     {
-        img: ROUTER_ICON,
-        title: ROUTER,
-    },
-    {
-        img: ROUTER_ICON,
-        title: ROUTER,
-    },
-    {
-        img: ROUTER_ICON,
-        title: ROUTER,
-    },
-    {
-        img: ROUTER_ICON,
-        title: ROUTER,
-    },
-
+        img: SERVER_ICON,
+        title: SERVER,
+    }
 ];

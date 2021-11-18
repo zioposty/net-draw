@@ -4,15 +4,25 @@ export const ROUTER_ICON = DEVICE_PATH + "router.svg"  //"https://upload.wikimed
 export const ROUTER = "Router"
 export const PC_ICON = DEVICE_PATH + "pc.svg" //"https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Computer_n_screen.svg/991px-Computer_n_screen.svg.png"
 export const PC = "PC"
-
+export const SERVER_ICON = DEVICE_PATH + "server.svg"
+export const SERVER = "Server"
 //----
 const BLOCK_PATH = "./assets/cluster/"
 export const CLOUD_ICON = BLOCK_PATH + "cloud.svg" 
 export const CLOUD ="Cloud"
+export const SQUARE_ICON = BLOCK_PATH + "square.png"
+export const SQUARE = "Square"
+//---
 
-export const BLOCK = {
+export const FAKE_ICON = "./assets/fake.svg"
+
+
+
+/* export var BLOCK = {
 
     isBlock: true,
+    isFake: false,
+    x: 30, y: 30,
     renderLabel: true,
     size: { height: 500, width: 800},
     symbolType: 'square',
@@ -20,4 +30,4 @@ export const BLOCK = {
     color: "#FFFFFF",
     strokeColor: "blue",
     opacity: 0.5
-}
+} */

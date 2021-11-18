@@ -8,6 +8,8 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import ColorPicker from 'material-ui-color-picker'
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 
 
 class NodeMenu extends React.Component {
@@ -86,7 +88,7 @@ class BlockMenu extends React.Component {
             value: props.block,
             size: { width: props.size.width, height: props.size.height }
         }
-        console.log(props.size)
+        console.log(this.state)
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeH = this.handleChangeH.bind(this);
         this.handleChangeW = this.handleChangeW.bind(this);
@@ -98,33 +100,38 @@ class BlockMenu extends React.Component {
 
     handleChangeH(event) {
         let h = event.target.value;
-        
-        h = (Number.isInteger(h) && h>0)? h : this.state.size.height
+
+        h = (Number.isInteger(Number.parseInt(h)) && h > 0) ? h : this.state.size.height
 
         this.setState({
             size: {
-                height: h
+                height: h,
+                width: this.state.size.width
             }
         });
     }
 
     handleChangeW(event) {
         let w = event.target.value;
-        
-        w = (Number.isInteger(w) && w>0)? w : this.state.size.width
+
+        w = (Number.isInteger(Number.parseInt(w)) && w > 0) ? w : this.state.size.width
 
         this.setState({
             size: {
-                width: w
+                width: w,
+                height: this.state.size.height
             }
         });
     }
 
+    componentDidUpdate() {
+
+    }
     render() {
         return (
             <div>
-                <form onSubmit={(event) => { event.preventDefault(); console.log(this.state); this.props.updateNodeName(this.state.value, this.props.block) }}>
-                    <h1>{this.props.block}</h1>
+                <form onSubmit={(event) => { event.preventDefault(); console.log(this.state); this.props.updateNodeName(this.state.value, this.props.block.id) }}>
+                    <h1 onChange={() => { this.state.size = this.props.size; console.log(this.state) }}>{this.props.block.id}</h1>
                     <Stack spacing={1} direction="row">
                         <TextField id="block-new-name" label="New Name" variant="outlined" onChange={this.handleChange} />
                         <Button type="submit" variant='outlined'> Rename </Button>
@@ -135,33 +142,11 @@ class BlockMenu extends React.Component {
                 <Button onClick={this.props.removeNode} style={{ marginTop: 5 }} variant='outlined'> Remove Node</Button>
 
                 <div style={{ marginTop: "5%" }}>
-                    <Stack spacing={1} direction="row">
 
-                        <ColorPicker
-                            name='color'
-                            value={this.props.color}
-                            onChange={(color) => this.props.onChangeColor(color)}
-                            TextFieldProps={{
-                                value: this.props.color,
-                                label: "Border Color",
-                                InputProps: {
-                                    readOnly: true,
-                                }
-                            }}
-                        />
-
-                        <Button variant='outlined' onClick={(event) => { event.preventDefault(); this.props.applyColor(this.props.color, this.props.block) }} > Confirm </Button>
-
-
-                    </Stack>
-                </div>
-
-                <div style={{ marginTop: "5%" }}>
-
-                    <form onSubmit={(event) => { event.preventDefault(); console.log(this.state); this.props.updateBlockSize(this.state.size, this.props.block) }}>
+                    <form onSubmit={(event) => { event.preventDefault(); console.log(this.state); this.props.updateBlockSize(this.state.size) }}>
                         <Stack spacing={1} direction="row">
-                            <TextField type="number" defaultValue={this.state.size.height} id="block-new-height" label="Height" variant="outlined" onChange={this.handleChangeH} />
-                            <TextField type="number" defaultValue={this.state.size.width} id="block-new-width" label="Width" variant="outlined" onChange={this.handleChangeW} />
+                            <TextField type="number" value={this.state.size.height} id="block-new-height" label={"Height: " + this.props.size.height} variant="outlined" onChange={this.handleChangeH} />
+                            <TextField type="number" value={this.state.size.width} id="block-new-width" label={"Width: " + this.props.size.width} variant="outlined" onChange={this.handleChangeW} />
                             <Button type="submit" variant='outlined'> Resize</Button>
                         </Stack>
                     </form>
@@ -218,7 +203,7 @@ class LinkMenu extends React.Component {
         return (
             <div>
                 <h1> Link </h1>
-
+                <FormControlLabel control={<Checkbox checked={this.props.directed} onChange={(event) => this.props.onChangeDirected(event.target.checked, this.props.link)} />} label="Directed" />
                 <div style={{ marginTop: "5%", maxWidth: 370 }}>
                     <h2> Vertexes </h2>
                     <List sx={{ bgcolor: '#f0f0f0' }}>
