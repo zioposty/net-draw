@@ -238,13 +238,13 @@ class GraphGen extends React.Component {
 		const idx = nodes.findIndex(n => n.id == nodeId);
 
 		if (this.state.isGridModeOn) {
-			nodes[idx].fx = Math.round(fx / 20.0) * 20 //+ (10 - nodes[idx].size.height / 20); //10 - n.size.height/20)
-			nodes[idx].fy = Math.round(fy / 20.0) * 20 //+ (10 - nodes[idx].size.width / 20);
+			fx = Math.round(fx / 20.0) * 20 //+ (10 - nodes[idx].size.height / 20); //10 - n.size.height/20)
+			fy = Math.round(fy / 20.0) * 20 //+ (10 - nodes[idx].size.width / 20);
 		}
-		else {
-			nodes[idx].fx = fx;
-			nodes[idx].fy = fy;
-		}
+		
+		nodes[idx].fx = fx;
+		nodes[idx].fy = fy;
+
 		if (nodes[idx].isFake) {
 			let fake = this.state.breakPoints[Number.parseInt(nodes[idx].id)];
 			fake.x = fx;
@@ -495,11 +495,11 @@ class GraphGen extends React.Component {
 		let { source, target } = link;
 
 		let idx = this.state.links.findIndex(l => l.source == source && l.target == target)
-		
+
 		let links = this.state.links;
 		links[idx].directed = directed;
-		
-		this.setState({links: links})
+
+		this.setState({ links: links })
 
 		/* let l = document.getElementById(source + "," + target);
 		directed ? l.setAttribute("marker-end", "url(#marker-small)") :

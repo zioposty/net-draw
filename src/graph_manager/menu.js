@@ -180,7 +180,7 @@ class LinkMenu extends React.Component {
                 </ListItemAvatar>
                 <ListItemText
                     primary={nodeSource.id}
-                    secondary={nodeSource.device}
+                    secondary={this.props.link.directed? "Source" : nodeSource.device}
                 />
             </ListItem>
         )
@@ -192,7 +192,7 @@ class LinkMenu extends React.Component {
                 </ListItemAvatar>
                 <ListItemText
                     primary={nodeTarget.id}
-                    secondary={nodeTarget.device}
+                    secondary={this.props.link.directed? "Target" : nodeTarget.device}
                 />
             </ListItem>)
         return nodes;

@@ -10,7 +10,7 @@ export const SERVER = "Server"
 const BLOCK_PATH = "./assets/cluster/"
 export const CLOUD_ICON = BLOCK_PATH + "cloud.svg" 
 export const CLOUD ="Cloud"
-export const SQUARE_ICON = BLOCK_PATH + "square.png"
+export const SQUARE_ICON = BLOCK_PATH + "square.svg"
 export const SQUARE = "Square"
 //---
 
