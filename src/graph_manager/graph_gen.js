@@ -163,7 +163,8 @@ class GraphGen extends React.Component {
 		if (node.isFake) {
 			//remove node
 
-			this.state.breakPoints.splice(nodeId, 1);
+			let fakeIdx = this.state.breakPoints.findIndex( n => n.id = nodeId);
+			this.state.breakPoints.splice(fakeIdx, 1);
 			this.state.nodes.splice(idx, 1);
 
 			this.setState({
@@ -235,7 +236,7 @@ class GraphGen extends React.Component {
 	onNodePositionChange = (nodeId, fx, fy) => {
 		let nodes = this.state.nodes;
 
-		const idx = nodes.findIndex(n => n.id == nodeId);
+		const idx = nodes.findIndex(n => n.id === nodeId);
 
 		if (this.state.isGridModeOn) {
 			fx = Math.round(fx / 20.0) * 20 //+ (10 - nodes[idx].size.height / 20); //10 - n.size.height/20)
@@ -249,7 +250,12 @@ class GraphGen extends React.Component {
 
 
 		if (nodes[idx].isFake) {
-			let fake = this.state.breakPoints[Number.parseInt(nodes[idx].id)];
+			console.log("UPDATE FAKE POS")
+			console.log(this.state.breakPoints);
+			console.log(this.state.nodes);
+
+			let fake = this.state.breakPoints.find( n => n.id === nodes[idx].id )
+			//this.state.breakPoints[Number.parseInt(nodes[idx].id)];
 			fake.x = fx;
 			fake.y = fy;
 			fake.fx = fx;
@@ -308,13 +314,21 @@ class GraphGen extends React.Component {
 		let check = this.state.breakPoints.findIndex(n => n.fx == canvas_x && n.fy == canvas_y);
 		if (check != -1) { console.log("No breakpoint on same position"); return };
 
+		let newFakeId = this.state.breakPoints.length
+	
 		this.state.nodes.push({
-			id: this.state.breakPoints.length,
+			id: newFakeId,
 			x: canvas_x, y: canvas_y,
 			fx: canvas_x, fy: canvas_y,
 			isFake: true, svg: FAKE_ICON, size: { height: 50, width: 50 },
 		});
-		this.state.breakPoints.push({ x: canvas_x, y: canvas_y, fx: canvas_x, fy: canvas_y, })
+
+		this.state.breakPoints.push({
+			id: newFakeId,
+			x: canvas_x, y: canvas_y, fx: canvas_x, fy: canvas_y,
+		})
+
+
 		console.log("BREAKPOINTS")
 		console.log(this.state.nodes)
 		this.setState({ breakPoints: this.state.breakPoints });
@@ -417,6 +431,7 @@ class GraphGen extends React.Component {
 			});
 
 			this.state.breakPoints.push({
+				id: count,
 				fx: fakeNode.x, fy: fakeNode.y,
 				x: fakeNode.x, y: fakeNode.y,
 			})
@@ -622,7 +637,7 @@ class GraphGen extends React.Component {
 							console.log(this.state)
 							let idx = this.state.nodes.findIndex(n => n.id == this.state.node_selected);
 							this.state.nodes[idx].size = size;
-							this.setState({ nodes: this.state.nodes})
+							this.setState({ nodes: this.state.nodes })
 						}
 						}
 					/>
