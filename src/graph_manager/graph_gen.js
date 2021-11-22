@@ -21,6 +21,8 @@ import config from "./network-config";
 import { NodeContextMenu, LinkContextMenu } from './context';
 
 import ImgTabs from './imageTab/imageTab';
+import ResizableSquare from './resizeSquare';
+import { event } from 'd3';
 
 
 
@@ -41,6 +43,7 @@ class GraphGen extends React.Component {
 			node_selected: null,
 			link_selected: null,
 			temp_link_color: config.link.color,
+			resize: false
 		};
 
 
@@ -135,7 +138,7 @@ class GraphGen extends React.Component {
 		let node = this.state.nodes.find(n => n.id == nodeId);
 
 		if (this.state.breakPoints.length == 0) {
-			data.focusedNodeId = nodeId;
+			//data.focusedNodeId = nodeId;
 			this.setState({ menu: true, selected: node.isBlock ? 1 : 0, node_selected: nodeId, new_source: null })
 		}
 
@@ -163,7 +166,7 @@ class GraphGen extends React.Component {
 		if (node.isFake) {
 			//remove node
 
-			let fakeIdx = this.state.breakPoints.findIndex( n => n.id = nodeId);
+			let fakeIdx = this.state.breakPoints.findIndex(n => n.id = nodeId);
 			this.state.breakPoints.splice(fakeIdx, 1);
 			this.state.nodes.splice(idx, 1);
 
@@ -254,7 +257,7 @@ class GraphGen extends React.Component {
 			console.log(this.state.breakPoints);
 			console.log(this.state.nodes);
 
-			let fake = this.state.breakPoints.find( n => n.id === nodes[idx].id )
+			let fake = this.state.breakPoints.find(n => n.id === nodes[idx].id)
 			//this.state.breakPoints[Number.parseInt(nodes[idx].id)];
 			fake.x = fx;
 			fake.y = fy;
@@ -315,7 +318,7 @@ class GraphGen extends React.Component {
 		if (check != -1) { console.log("No breakpoint on same position"); return };
 
 		let newFakeId = this.state.breakPoints.length
-	
+
 		this.state.nodes.push({
 			id: newFakeId,
 			x: canvas_x, y: canvas_y,
@@ -589,20 +592,16 @@ class GraphGen extends React.Component {
 	}
 
 
-	testt(id) {
-		let n = this.state.nodes.find(n => n.id === id);
-		console.log(id)
-		return n
-	}
-
 	render() {
 
 		const { menu, selected } = this.state;
 		if (this.state.nodes.length == 0) {
 			this.state.nodes.push({
-				id: "Pc0",
+				id: "PC0",
 				fx: 20,
 				fy: 20,
+				x: 20,
+				y: 20,
 				svg: PC_ICON,
 				device: PC,
 				fake: false,
@@ -630,7 +629,13 @@ class GraphGen extends React.Component {
 					<BlockMenu
 						updateNodeName={this.updateNodeName}
 						removeNode={() => this.removeNode(this.state.node_selected)}
-						block={this.testt(this.state.node_selected)}
+						block={() => {
+							let id = this.state.node_selected
+							let n = this.state.nodes.find(n => n.id === id);
+							console.log(id)
+							return n
+						}
+						}
 						size={this.state.nodes.find(n => n.id === this.state.node_selected).size}
 						updateBlockSize={(size) => {
 							console.log(size);
@@ -661,6 +666,29 @@ class GraphGen extends React.Component {
 			}
 		}
 
+		let square = <> </>;
+		const { resize } = this.state
+
+		if (resize) {
+			let node = this.state.nodes.find(n => n.id === this.state.target);
+			square = <ResizableSquare
+				node={node}
+				zoom={(this.state.zoom != null) ? this.state.zoom : 1}
+				resizeNode={(size) => {
+					let idx = this.state.nodes.findIndex(n => n.id == this.state.target);
+					this.state.nodes[idx].size = size;
+					this.setState({ nodes: this.state.nodes })
+				}}
+				endResize={() => {
+					node.labelPosition = "right"
+					this.setState({ resize: false })
+					config.freezeAllDragEvents = false;
+					this.forceUpdate();
+				}}
+			/>
+		}
+		else square = <> </>
+
 		return (
 			<div>
 				<div style={{ float: "left", width: "30%" }}>
@@ -670,8 +698,8 @@ class GraphGen extends React.Component {
 						<Button variant="outlined" id="add_block" onClick={() => this.createBlock()}> Add Block </Button>
 					</div> */}
 					<Button variant="outlined" id="save" onClick={this.saveNetwork}>Save Network </Button>
-					<FormControlLabel control={
-						<Switch onChange={(event, checked) => {
+					<FormControlLabel id='grid-mod' control={
+						<Switch onChange={(_event, checked) => {
 							this.state.isGridModeOn = checked;
 							if (checked) this.discretization();
 						}} />}
@@ -684,13 +712,22 @@ class GraphGen extends React.Component {
 						{context}
 					</div>
 				</div>
-				<div style={{ border: '5px solid #0048ba', height: 800, width: 800, overflow: "hidden" }} onContextMenu={(ev) => { ev.preventDefault() }}>
+				<div id="graph-struct" style={{ border: '5px solid #0048ba', height: 800, width: 800, overflow: "hidden" }} onContextMenu={(ev) => { ev.preventDefault() }
+				}
+					onClick={(event) => {
+						let square = document.getElementById("ResizableSquare")
+
+						if (square !== null && !square.contains(event.target)) {
+							config.freezeAllDragEvents = false;
+							this.setState({ resize: false })
+						}
+					}}>
 
 					<Graph
 						id="graph-id" // id is mandatory
 						data={data}
-
 						config={config}
+
 						onClickNode={(nodeId) => this.onClickNode(nodeId)}
 						onClickLink={(source, target) => {
 							if (this.state.breakPoints.length == 0) {
@@ -705,8 +742,8 @@ class GraphGen extends React.Component {
 						}
 						onDoubleClickNode={node => this.onDoubleClickNode(node)}
 						onNodePositionChange={(nodeId, fx, fy) => this.onNodePositionChange(nodeId, fx, fy)}
-						onClickGraph={evt => this.breakpointHandler(evt)}
-						onRightClickNode={(evt, nodeID, node) => {
+						onClickGraph={evt => { console.log("SIIIUM"); this.breakpointHandler(evt) }}
+						onRightClickNode={(evt, nodeID, _node) => {
 							evt.preventDefault(); this.setState(this.state.contextMenu === null
 								? {
 									targetType: "Node",
@@ -730,15 +767,26 @@ class GraphGen extends React.Component {
 									}
 								}
 								: { contextMenu: null })
-						}
-						}
+						}}
+						onZoomChange={(_oldZoom, newZoom) => { this.setState({ zoom: newZoom }) }}
+
 					/>
+
+					{square}
 
 					<NodeContextMenu contextMenu={this.state.contextMenu}
 						target={this.state.target}
 						targetType={this.state.targetType}
 						removeNode={() => { this.setState({ contextMenu: null }); this.removeNode(this.state.target) }}
-						contextClose={() => this.setState({ contextMenu: null })} />
+						contextClose={() => this.setState({ contextMenu: null })}
+						drawSquare={() => {
+							this.setState({ resize: true });
+							config.freezeAllDragEvents = true;
+							this.forceUpdate();
+
+						}}
+
+					/>
 
 					<LinkContextMenu contextMenu={this.state.contextMenu}
 						target={this.state.target}

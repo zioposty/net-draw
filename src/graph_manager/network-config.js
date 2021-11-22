@@ -4,7 +4,7 @@ export default  {
     minZoom: 1,
     highlightOpacity: 0.4,
     highlightDegree: 1,
-    focusZoom: 3,
+    //focusZoom: 3,
     directed: false,
 
     linkHighlightBehavior: true,
@@ -15,6 +15,7 @@ export default  {
       size: { height: 200, width: 200},
       highlightStrokeColor: "blue",
       symbolType: 'square',
+      labelPosition: "right",
     },
     link: {
       color: "#000000",

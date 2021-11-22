@@ -16,6 +16,9 @@ export const SQUARE = "Square"
 
 export const FAKE_ICON = "./assets/fake.svg"
 
+//---
+export const GRAPH_ID = "graph-id-graph-container-zoomable"
+export const DEFAULT_GRAPH_TRANSLATE = "translate(0,0) scale(1)"
 
 
 /* export var BLOCK = {
