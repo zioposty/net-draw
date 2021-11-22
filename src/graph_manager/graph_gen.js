@@ -19,10 +19,10 @@ import Switch from '@mui/material/Switch';
 // General configuration of nodes
 import config from "./network-config";
 import { NodeContextMenu, LinkContextMenu } from './context';
+import NodePopover from './popover'
 
 import ImgTabs from './imageTab/imageTab';
 import ResizableSquare from './resizeSquare';
-import { event } from 'd3';
 
 
 
@@ -45,6 +45,7 @@ class GraphGen extends React.Component {
 			temp_link_color: config.link.color,
 			resize: false,
 			bidirected: false,
+			popover: false,
 		};
 
 
@@ -335,7 +336,7 @@ class GraphGen extends React.Component {
 		this.state.breakPoints.forEach(
 			n => {
 				if (n.id >= newFakeId)
-					newFakeId = n.id + 1 
+					newFakeId = n.id + 1
 			}
 		)
 
@@ -714,12 +715,12 @@ class GraphGen extends React.Component {
 		const { resize } = this.state
 
 		if (resize) {
-			let node = this.state.nodes.find(n => n.id === this.state.target);
+			let node = this.state.nodes.find(n => n.id === this.state.target.id);
 			square = <ResizableSquare
 				node={node}
 				zoom={(this.state.zoom != null) ? this.state.zoom : 1}
 				resizeNode={(size) => {
-					let idx = this.state.nodes.findIndex(n => n.id == this.state.target);
+					let idx = this.state.nodes.findIndex(n => n.id == this.state.target.id);
 					this.state.nodes[idx].size = size;
 					this.setState({ nodes: this.state.nodes })
 				}}
@@ -782,13 +783,18 @@ class GraphGen extends React.Component {
 						}
 						}
 						onDoubleClickNode={node => this.onDoubleClickNode(node)}
+						onMouseOverNode={(id) => {
+							let over = this.state.nodes.find(n => n.id == id)
+							this.setState({ target: over, popover: true })
+						}}
+						onMouseOutNode={(_id) => {if(this.state.popover) this.setState({popover: false})}}
 						onNodePositionChange={(nodeId, fx, fy) => this.onNodePositionChange(nodeId, fx, fy)}
 						onClickGraph={evt => { console.log("SIIIUM"); this.breakpointHandler(evt) }}
 						onRightClickNode={(evt, nodeID, _node) => {
 							evt.preventDefault(); this.setState(this.state.contextMenu === null
 								? {
 									targetType: "Node",
-									target: nodeID,
+									target: this.state.nodes.find(n => n.id == nodeID),
 									contextMenu: {
 										mouseX: evt.clientX - 3,
 										mouseY: evt.clientY - 5,
@@ -815,10 +821,19 @@ class GraphGen extends React.Component {
 
 					{square}
 
+					{
+						(this.state.popover)?
+						<NodePopover
+							node={this.state.target}
+							visible={this.state.popover}
+							onClose={() => this.setState({ popover: false })}
+						/>
+						: <></>
+					}
 					<NodeContextMenu contextMenu={this.state.contextMenu}
 						target={this.state.target}
 						targetType={this.state.targetType}
-						removeNode={() => { this.setState({ contextMenu: null }); this.removeNode(this.state.target) }}
+						removeNode={() => { this.setState({ contextMenu: null }); this.removeNode(this.state.target.id) }}
 						contextClose={() => this.setState({ contextMenu: null })}
 						drawSquare={() => {
 							this.setState({ resize: true });

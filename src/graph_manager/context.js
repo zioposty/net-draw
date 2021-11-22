@@ -21,11 +21,11 @@ class NodeContextMenu extends React.Component {
             : undefined
         }
       >
-        <MenuItem onClick={this.props.contextClose}> <b>{this.props.target}</b></MenuItem>
+        <MenuItem onClick={this.props.contextClose}> <b>{(this.props.contextMenu !== null)?this.props.target.id: undefined}</b></MenuItem>
         <MenuItem onClick={this.props.removeNode}>Remove</MenuItem>
         <MenuItem onClick={() => { this.props.contextClose(); this.props.drawSquare() }}>Resize</MenuItem>
         <MenuItem onClick={this.props.contextClose}>TODO</MenuItem>
-       
+
       </Menu>
 
     )
