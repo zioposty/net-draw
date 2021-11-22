@@ -43,7 +43,8 @@ class GraphGen extends React.Component {
 			node_selected: null,
 			link_selected: null,
 			temp_link_color: config.link.color,
-			resize: false
+			resize: false,
+			bidirected: false,
 		};
 
 
@@ -87,30 +88,31 @@ class GraphGen extends React.Component {
 				
 					} */
 
-				let color = null;
-				let directed = null;
-				let idx = links.findIndex(l => (l.source == source && l.target == target)
-					|| (l.source == target && l.target == source))
+				let color = this.state.new_link.color;
+				let directed = this.state.new_link.directed;
 
-				if (idx >= 0) {
-					color = links[idx].color;
-					directed = links[idx].directed;
-					links.splice(idx, 1);
-				}
-
-				//this.state.new_link.target = node
-
-				console.log(idx)
 				link = {
 					source: source, target: target,
 					color: (color == null) ? config.link.color : color,
 					breakPoints: this.state.breakPoints,
 					directed: directed == null ? false : directed
 				}
+				links.push(link);
+				if (this.state.bidirected) {
 
+					let bp = [...link.breakPoints]
 
-				this.state.links.push(link);
+					let otherLink = {
+						source: target, target: source,
+						color: (color == null) ? config.link.color : color,
+						breakPoints: bp.reverse(),
+						directed: true
+					}
+					links.unshift(otherLink)
+				}
+
 			}
+
 			//delete fake nodes
 			let idx = this.state.nodes.findIndex(n => n.isFake);
 			while (idx > -1) {
@@ -166,12 +168,11 @@ class GraphGen extends React.Component {
 		if (node.isFake) {
 			//remove node
 
-			let fakeIdx = this.state.breakPoints.findIndex(n => n.id = nodeId);
+			let fakeIdx = this.state.breakPoints.findIndex(n => n.id == nodeId);
 			this.state.breakPoints.splice(fakeIdx, 1);
 			this.state.nodes.splice(idx, 1);
-
 			this.setState({
-				breakpoints: this.state.breakPoints,
+				breakPoints: this.state.breakPoints,
 				nodes: this.state.nodes,
 			})
 			return;
@@ -219,13 +220,26 @@ class GraphGen extends React.Component {
 
 	removeLink = (link_selected) => {
 		let { source, target } = link_selected;
+		let links = this.state.links
 
-		for (let i = 0; i < this.state.links.length; i++) {
+		let idx = links.findIndex(l => l.source == source && l.target == target)
+
+
+		let removed = links.splice(idx, 1);
+		console.log(removed)
+		let bidirected = false;
+
+		if (removed[0].directed) {
+			let idx = links.findIndex(l => l.source == target && l.target == source)
+			if (idx != -1) { links.splice(idx, 1); bidirected = true; }
+		}
+
+		/* for (let i = 0; i < this.state.links.length; i++) {
 			if (this.state.links[i].source == source && this.state.links[i].target == target) {
 				this.state.links.splice(i, 1);
 				break;
 			}
-		}
+		} */
 
 		this.setState({
 			menu: false,
@@ -233,7 +247,7 @@ class GraphGen extends React.Component {
 			link_selected: null
 		});
 
-
+		return bidirected
 	}
 
 	onNodePositionChange = (nodeId, fx, fy) => {
@@ -317,7 +331,13 @@ class GraphGen extends React.Component {
 		let check = this.state.breakPoints.findIndex(n => n.fx == canvas_x && n.fy == canvas_y);
 		if (check != -1) { console.log("No breakpoint on same position"); return };
 
-		let newFakeId = this.state.breakPoints.length
+		let newFakeId = 0;
+		this.state.breakPoints.forEach(
+			n => {
+				if (n.id >= newFakeId)
+					newFakeId = n.id + 1 
+			}
+		)
 
 		this.state.nodes.push({
 			id: newFakeId,
@@ -410,11 +430,13 @@ class GraphGen extends React.Component {
 
 	showBreakPoints = (link) => {
 		console.log(link)
+		let links = this.state.links
 		let { source, target } = link;
 
-		this.state.new_link = { source, target };
+		let idx = links.findIndex(l => l.source == source && l.target == target)
+		this.state.new_link = links[idx];
 
-		this.removeLink(link);
+		this.state.bidirected = this.removeLink(link);
 
 		console.log(source + " " + target);
 		document.getElementById("save").disabled = true;
@@ -549,19 +571,41 @@ class GraphGen extends React.Component {
 	}
 
 	onChangeDirected = (directed, link) => {
-		console.log(link);
 		let { source, target } = link;
 
 		let idx = this.state.links.findIndex(l => l.source == source && l.target == target)
 
 		let links = this.state.links;
-		links[idx].directed = directed;
+		console.log(directed)
+		switch (directed) {
+			case "0":
+			case "1": {
+				let idxToRemove = links.findIndex(l => l.source == target && l.target == source)
+				if (idxToRemove != -1) {
+					console.log(links.splice(idxToRemove, 1));
+					console.log(link)
+				}
 
+				break;
+			}
+
+			case "2": {
+				console.log("Created other edge")
+				var bp = [...link.breakPoints];
+
+				console.log(bp)
+
+				let new_link = { source: target, target: source, directed: true, breakPoints: bp.reverse() }
+				links.unshift(new_link)
+			}
+		}
+
+		link.directed = (directed != 0);
+
+		console.log(link)
+		console.log(directed != 0)
 		this.setState({ links: links })
 
-		/* let l = document.getElementById(source + "," + target);
-		directed ? l.setAttribute("marker-end", "url(#marker-small)") :
-			l.setAttribute("marker-end", "null ");*/
 
 	}
 
@@ -613,7 +657,7 @@ class GraphGen extends React.Component {
 		let context = <div></div>;
 		if (menu) {
 			if (selected == 0) {
-				context = <div>
+				context = <div style={{ float: "right", width: "20%" }}>
 					<NodeMenu
 						node={this.state.node_selected}
 						removeNode={() => this.removeNode(this.state.node_selected)}
@@ -625,7 +669,7 @@ class GraphGen extends React.Component {
 				</div>;
 			}
 			else if (selected == 1) {
-				context = <div>
+				context = <div style={{ float: "right", width: "20%" }}>
 					<BlockMenu
 						updateNodeName={this.updateNodeName}
 						removeNode={() => this.removeNode(this.state.node_selected)}
@@ -649,7 +693,7 @@ class GraphGen extends React.Component {
 				</div>
 			}
 			else {
-				context = <div>
+				context = <div style={{ float: "right", width: "20%" }}>
 					<LinkMenu
 						link={this.state.link_selected}
 						directed={this.state.links.find(l => l.source == this.state.link_selected.source && l.target == this.state.link_selected.target).directed}
@@ -691,28 +735,25 @@ class GraphGen extends React.Component {
 
 		return (
 			<div>
+				{context}
 				<div style={{ float: "left", width: "30%" }}>
-					{/*    <div>
-						<Button variant="outlined" id="add_router" onClick={() => this.createNode(ROUTER_ICON, ROUTER)}> Add Router </Button>
-						<Button variant="outlined" id="add_pc" onClick={() => this.createNode(PC_ICON, PC)}> Add PC </Button>
-						<Button variant="outlined" id="add_block" onClick={() => this.createBlock()}> Add Block </Button>
-					</div> */}
 					<Button variant="outlined" id="save" onClick={this.saveNetwork}>Save Network </Button>
-					<FormControlLabel id='grid-mod' control={
-						<Switch onChange={(_event, checked) => {
-							this.state.isGridModeOn = checked;
-							if (checked) this.discretization();
-						}} />}
-						label="Grid Mode" />
-					<ImgTabs
+
+					<FormControlLabel id='grid-mod' control={<Switch onChange={(_event, checked) => {
+						this.state.isGridModeOn = checked;
+						if (checked)
+							this.discretization();
+					}} />}
+						label="Grid Mode" /><ImgTabs
 						createNode={this.createNode}
 						createBlock={this.createBlock} />
 
+
 					<div>
-						{context}
+
 					</div>
 				</div>
-				<div id="graph-struct" style={{ border: '5px solid #0048ba', height: 800, width: 800, overflow: "hidden" }} onContextMenu={(ev) => { ev.preventDefault() }
+				<div id="graph-struct" style={{ border: '5px solid #0048ba', height: 800, width: 800, overflow: "hidden", display: 'inline-block' }} onContextMenu={(ev) => { ev.preventDefault() }
 				}
 					onClick={(event) => {
 						let square = document.getElementById("ResizableSquare")

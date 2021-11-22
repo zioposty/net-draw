@@ -8,8 +8,11 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import ColorPicker from 'material-ui-color-picker'
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
 
 
 class NodeMenu extends React.Component {
@@ -180,7 +183,7 @@ class LinkMenu extends React.Component {
                 </ListItemAvatar>
                 <ListItemText
                     primary={nodeSource.id}
-                    secondary={this.props.link.directed? "Source" : nodeSource.device}
+                    secondary={this.props.link.directed ? "Source" : nodeSource.device}
                 />
             </ListItem>
         )
@@ -192,18 +195,36 @@ class LinkMenu extends React.Component {
                 </ListItemAvatar>
                 <ListItemText
                     primary={nodeTarget.id}
-                    secondary={this.props.link.directed? "Target" : nodeTarget.device}
+                    secondary={this.props.link.directed ? "Target" : nodeTarget.device}
                 />
             </ListItem>)
         return nodes;
 
     }
 
+    handleChangeDirected = (event, value) => {
+        this.props.onChangeDirected(value, this.props.link)
+    }
+
     render() {
         return (
             <div>
                 <h1> Link </h1>
-                <FormControlLabel control={<Checkbox checked={this.props.directed} onChange={(event) => this.props.onChangeDirected(event.target.checked, this.props.link)} />} label="Directed" />
+                {/* <FormControlLabel control={
+                    <Checkbox checked={this.props.directed} onChange={(event) => this.props.onChangeDirected(event.target.checked, this.props.link)} />}
+                    label="Directed"
+                /> */}
+
+                <FormControl component="fieldset">
+                    <FormLabel component="legend">Is directed</FormLabel>
+                    <RadioGroup row aria-label="gender" name="row-radio-buttons-group" defaultValue={0}
+                    onChange={this.handleChangeDirected}>
+                        <FormControlLabel value="0" control={<Radio />} label="None" />
+                        <FormControlLabel value="1" control={<Radio />} label="Yes" />
+                        <FormControlLabel value="2" control={<Radio />} label="Both" />
+                    </RadioGroup>
+                </FormControl>
+
                 <div style={{ marginTop: "5%", maxWidth: 370 }}>
                     <h2> Vertexes </h2>
                     <List sx={{ bgcolor: '#f0f0f0' }}>
