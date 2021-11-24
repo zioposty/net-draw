@@ -87,11 +87,12 @@ class BlockMenu extends React.Component {
     constructor(props) {
         super(props)
 
+        console.log(props);
+
         this.state = {
             value: props.block,
             size: { width: props.size.width, height: props.size.height }
         }
-        console.log(this.state)
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeH = this.handleChangeH.bind(this);
         this.handleChangeW = this.handleChangeW.bind(this);

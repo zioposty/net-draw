@@ -294,6 +294,10 @@ class GraphGen extends React.Component {
 		if (idx == -1) {
 
 			const idx = this.state.nodes.findIndex(node => node.id === old_val);
+			if (idx == -1) {
+				window.alert("Rename Error val: " + value + " \n oldval: " + old_val);
+				return;
+			}
 
 			this.state.nodes[idx].id = value;
 			this.state.links.forEach(link => {
@@ -674,13 +678,7 @@ class GraphGen extends React.Component {
 					<BlockMenu
 						updateNodeName={this.updateNodeName}
 						removeNode={() => this.removeNode(this.state.node_selected)}
-						block={() => {
-							let id = this.state.node_selected
-							let n = this.state.nodes.find(n => n.id === id);
-							console.log(id)
-							return n
-						}
-						}
+						block={this.state.nodes.find(n => n.id === this.state.node_selected)}
 						size={this.state.nodes.find(n => n.id === this.state.node_selected).size}
 						updateBlockSize={(size) => {
 							console.log(size);
@@ -787,7 +785,7 @@ class GraphGen extends React.Component {
 							let over = this.state.nodes.find(n => n.id == id)
 							this.setState({ target: over, popover: true })
 						}}
-						onMouseOutNode={(_id) => {if(this.state.popover) this.setState({popover: false})}}
+						onMouseOutNode={(_id) => { if (this.state.popover) this.setState({ popover: false }) }}
 						onNodePositionChange={(nodeId, fx, fy) => this.onNodePositionChange(nodeId, fx, fy)}
 						onClickGraph={evt => { console.log("SIIIUM"); this.breakpointHandler(evt) }}
 						onRightClickNode={(evt, nodeID, _node) => {
@@ -822,13 +820,13 @@ class GraphGen extends React.Component {
 					{square}
 
 					{
-						(this.state.popover)?
-						<NodePopover
-							node={this.state.target}
-							visible={this.state.popover}
-							onClose={() => this.setState({ popover: false })}
-						/>
-						: <></>
+						(this.state.popover) ?
+							<NodePopover
+								node={this.state.target}
+								visible={this.state.popover}
+								onClose={() => this.setState({ popover: false })}
+							/>
+							: <></>
 					}
 					<NodeContextMenu contextMenu={this.state.contextMenu}
 						target={this.state.target}
