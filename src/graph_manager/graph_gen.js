@@ -79,39 +79,41 @@ class GraphGen extends React.Component {
 			let target = (this.state.new_link.target === null) ? node : this.state.new_link.target;
 
 			if (source !== target) {
-				/*  let valid = true;
-				 for (let i = 0; i < this.state.links.length; i++) {
-					 if ((links[i].source == source && links[i].target == target)
-						 || (this.state.links[i].source == target && this.state.links[i].target == source)) {
-						 valid = false;
-						 break;
-					 }
-				
-					} */
-
-				let color = this.state.new_link.color;
-				let directed = this.state.new_link.directed;
-
-				link = {
-					source: source, target: target,
-					color: (color == null) ? config.link.color : color,
-					breakPoints: this.state.breakPoints,
-					directed: directed == null ? false : directed
-				}
-				links.push(link);
-				if (this.state.bidirected) {
-
-					let bp = [...link.breakPoints]
-
-					let otherLink = {
-						source: target, target: source,
-						color: (color == null) ? config.link.color : color,
-						breakPoints: bp.reverse(),
-						directed: true
+				let valid = true;
+				for (let i = 0; i < this.state.links.length; i++) {
+					if ((links[i].source == source && links[i].target == target)
+						|| (this.state.links[i].source == target && this.state.links[i].target == source)) {
+						valid = false;
+						break;
 					}
-					links.unshift(otherLink)
+
 				}
 
+				if (valid) {
+					let color = this.state.new_link.color;
+					let directed = this.state.new_link.directed;
+
+					link = {
+						source: source, target: target,
+						color: (color == null) ? config.link.color : color,
+						breakPoints: this.state.breakPoints,
+						directed: directed == null ? false : directed
+					}
+					links.push(link);
+					if (this.state.bidirected) {
+
+						let bp = [...link.breakPoints]
+
+						let otherLink = {
+							source: target, target: source,
+							color: (color == null) ? config.link.color : color,
+							breakPoints: bp.reverse(),
+							directed: true
+						}
+						links.unshift(otherLink)
+					}
+
+				}
 			}
 
 			//delete fake nodes
