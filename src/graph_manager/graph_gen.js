@@ -715,17 +715,29 @@ class GraphGen extends React.Component {
 		const { resize } = this.state
 
 		if (resize) {
-			let node = this.state.nodes.find(n => n.id === this.state.target.id);
+			let node = this.state.nodes.find(n => n.id === this.state.toResize);
 			square = <ResizableSquare
 				node={node}
 				zoom={(this.state.zoom != null) ? this.state.zoom : 1}
 				resizeNode={(size) => {
-					let idx = this.state.nodes.findIndex(n => n.id == this.state.target.id);
+					let idx = this.state.nodes.findIndex(n => n.id == this.state.toResize);
 					this.state.nodes[idx].size = size;
 					this.setState({ nodes: this.state.nodes })
 				}}
 				endResize={() => {
-					node.labelPosition = "right"
+					let children = document.getElementById(node.id).childNodes;
+					if( children.length == 0) return;
+
+					if ( node.isBlock ){
+						let blockHeight = children[0].getAttribute("height");
+						let blockLabel = children[1];
+						blockLabel.setAttribute("dy", blockHeight/2)
+					}
+					else {
+						let nodeWidth = children[0].getAttribute("width");
+						let nodeLabel = children[1];
+						nodeLabel.setAttribute("dx", nodeWidth/2)
+					}
 					this.setState({ resize: false })
 					config.freezeAllDragEvents = false;
 					this.forceUpdate();
@@ -835,6 +847,7 @@ class GraphGen extends React.Component {
 						targetType={this.state.targetType}
 						removeNode={() => { this.setState({ contextMenu: null }); this.removeNode(this.state.target.id) }}
 						contextClose={() => this.setState({ contextMenu: null })}
+						toResize={(id) => { this.setState({toResize: id}) } }
 						drawSquare={() => {
 							this.setState({ resize: true });
 							config.freezeAllDragEvents = true;
