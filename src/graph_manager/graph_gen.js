@@ -731,7 +731,7 @@ class GraphGen extends React.Component {
 					if ( node.isBlock ){
 						let blockHeight = children[0].getAttribute("height");
 						let blockLabel = children[1];
-						blockLabel.setAttribute("dy", blockHeight/2)
+						blockLabel.setAttribute("dy", -1*blockHeight/2)
 					}
 					else {
 						let nodeWidth = children[0].getAttribute("width");

@@ -65,8 +65,8 @@ class ResizableSquare extends Component {
                     height={height}
                     rotateAngle={rotateAngle}
                     // aspectRatio={false}
-                    minWidth={20}
-                    minHeight={20}
+                    minWidth={20*this.props.zoom}
+                    minHeight={20*this.props.zoom}
                     zoomable='n, w, s, e, nw, ne, se, sw'
                     // rotatable={true}
                     // onRotateStart={this.handleRotateStart}
