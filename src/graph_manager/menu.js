@@ -38,7 +38,8 @@ class NodeMenu extends React.Component {
             let node = this.props.nodes.find(n => n.id === nodeId);
 
             nodes.push(
-                <ListItem key={"listitem-" + nodeId} onDoubleClick={() => { console.log(nodeId); this.props.clickNeighbor(nodeId) }}>
+                <ListItem key={"listitem-" + nodeId} onDoubleClick={() => { console.log(nodeId); this.props.clickNeighbor(nodeId) }}
+                    style={{ cursor: 'pointer' }}>
                     <ListItemAvatar>
                         <Avatar alt={node.id} src={node.svg} />
                     </ListItemAvatar>
@@ -219,7 +220,7 @@ class LinkMenu extends React.Component {
                 <FormControl component="fieldset">
                     <FormLabel component="legend">Is directed</FormLabel>
                     <RadioGroup row aria-label="gender" name="row-radio-buttons-group" defaultValue={0}
-                    onChange={this.handleChangeDirected}>
+                        onChange={this.handleChangeDirected}>
                         <FormControlLabel value="0" control={<Radio />} label="None" />
                         <FormControlLabel value="1" control={<Radio />} label="Yes" />
                         <FormControlLabel value="2" control={<Radio />} label="Both" />
@@ -238,20 +239,21 @@ class LinkMenu extends React.Component {
 
                 <div style={{ marginTop: "5%" }}>
                     <Stack spacing={1} direction="row">
+                        <Stack direction="column">
+                            <ColorPicker
+                                name='color'
 
-                        <ColorPicker
-                            name='color'
-                            value={this.props.color}
-                            onChange={(color) => this.props.onChangeColor(color)}
-                            TextFieldProps={{
-                                value: this.props.color,
-                                label: "Link Color",
-                                InputProps: {
-                                    readOnly: true,
-                                }
-                            }}
-                        />
-
+                                value={this.props.color}
+                                onChange={(color) => this.props.onChangeColor(color)}
+                                TextFieldProps={{
+                                    value: this.props.color,
+                                    label: "Link Color",
+                                    InputProps: {
+                                        readOnly: true,
+                                    }
+                                }}
+                            />
+                        </Stack>
                         <Button variant='outlined' onClick={(event) => { event.preventDefault(); this.props.applyColor(this.props.color, this.props.link) }} > Confirm </Button>
 
 

@@ -15,6 +15,9 @@ import Button from '@mui/material/Button';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 // General configuration of nodes
 import config from "./network-config";
@@ -159,6 +162,33 @@ class GraphGen extends React.Component {
 		link.href = url;
 		link.click();
 	};
+
+	loadNetwork = (event) => {
+		new Response(event.target.files[0]).json().then(json => {
+	
+			data.nodes = json.nodes
+			data.links = json.links
+			this.setState({
+				nodes: json.nodes,
+				links: json.links,
+				new_link: null,
+				breakPoints: [],
+				target: null,
+				menu: false,
+				contextMenu: null,
+				selected: 0,
+				node_selected: null,
+				link_selected: null,
+				temp_link_color: config.link.color,
+				resize: false,
+				bidirected: false,
+				popover: false,
+			})
+		});
+
+		this.forceUpdate()
+
+	}
 
 	removeNode = (nodeId) => {
 		let idx = this.state.nodes.findIndex(n => n.id == nodeId);
@@ -648,7 +678,7 @@ class GraphGen extends React.Component {
 		const { menu, selected } = this.state;
 		if (this.state.nodes.length == 0) {
 			this.state.nodes.push({
-				id: "PC0",
+				id: "PC" + Math.floor(Math.random() * 10000),
 				fx: 20,
 				fy: 20,
 				x: 20,
@@ -726,17 +756,17 @@ class GraphGen extends React.Component {
 				}}
 				endResize={() => {
 					let children = document.getElementById(node.id).childNodes;
-					if( children.length == 0) return;
+					if (children.length == 0) return;
 
-					if ( node.isBlock ){
+					if (node.isBlock) {
 						let blockHeight = children[0].getAttribute("height");
 						let blockLabel = children[1];
-						blockLabel.setAttribute("dy", -1*blockHeight/2)
+						blockLabel.setAttribute("dy", -1 * blockHeight / 2)
 					}
 					else {
 						let nodeWidth = children[0].getAttribute("width");
 						let nodeLabel = children[1];
-						nodeLabel.setAttribute("dx", nodeWidth/2)
+						nodeLabel.setAttribute("dx", nodeWidth / 2)
 					}
 					this.setState({ resize: false })
 					config.freezeAllDragEvents = false;
@@ -751,6 +781,17 @@ class GraphGen extends React.Component {
 				{context}
 				<div style={{ float: "left", width: "30%" }}>
 					<Button variant="outlined" id="save" onClick={this.saveNetwork}>Save Network </Button>
+					<Button variant="outlined" id="load" component="label"> Load Network <input
+						type="file"
+						hidden
+						accept=".json"
+						onChange={(evt) =>
+							this.loadNetwork(evt)
+						}
+						onClick={(event) => {
+							event.target.value = null
+						}}
+					/> </Button>
 
 					<FormControlLabel id='grid-mod' control={<Switch onChange={(_event, checked) => {
 						this.state.isGridModeOn = checked;
@@ -782,8 +823,13 @@ class GraphGen extends React.Component {
 						data={data}
 						config={config}
 
-						onClickNode={(nodeId) => this.onClickNode(nodeId)}
+						onClickNode={(id) => {
+							this.onClickNode(id)
+							toast("MouseClick triggered: " + id, { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
+						}}
 						onClickLink={(source, target) => {
+							toast("ClickLink triggered: (" + source + ", " + target + ")", { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
+
 							if (this.state.breakPoints.length == 0) {
 								let link = this.state.links.find(l => l.source === source && l.target === target);
 								this.setState({
@@ -794,15 +840,22 @@ class GraphGen extends React.Component {
 							}
 						}
 						}
-						onDoubleClickNode={node => this.onDoubleClickNode(node)}
+						onDoubleClickNode={node => {
+							toast("DoubleClickNode triggered: " + node, { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
+							this.onDoubleClickNode(node);
+
+						}}
 						onMouseOverNode={(id) => {
+							// toast("MouseOver triggered " + id, { pauseOnHover: false, closeOnClick: true, autoClose: 2000})
 							let over = this.state.nodes.find(n => n.id == id)
+							if (over === undefined) return
 							this.setState({ target: over, popover: true })
 						}}
 						onMouseOutNode={(_id) => { if (this.state.popover) this.setState({ popover: false }) }}
 						onNodePositionChange={(nodeId, fx, fy) => this.onNodePositionChange(nodeId, fx, fy)}
-						onClickGraph={evt => { console.log("SIIIUM"); this.breakpointHandler(evt) }}
+						onClickGraph={evt => { this.breakpointHandler(evt) }}
 						onRightClickNode={(evt, nodeID, _node) => {
+							toast("RightClickNode triggered " + nodeID, { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
 							evt.preventDefault(); this.setState(this.state.contextMenu === null
 								? {
 									targetType: "Node",
@@ -816,6 +869,7 @@ class GraphGen extends React.Component {
 							console.log(this.state);
 						}}
 						onRightClickLink={(evt, source, target) => {
+							toast("RightClickLink triggered: (" + source + ", " + target + ")", { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
 							evt.preventDefault(); this.setState(this.state.contextMenu === null
 								? {
 									targetType: "Link",
@@ -830,7 +884,7 @@ class GraphGen extends React.Component {
 						onZoomChange={(_oldZoom, newZoom) => { this.setState({ zoom: newZoom }) }}
 
 					/>
-
+					<ToastContainer />
 					{square}
 
 					{
@@ -847,7 +901,7 @@ class GraphGen extends React.Component {
 						targetType={this.state.targetType}
 						removeNode={() => { this.setState({ contextMenu: null }); this.removeNode(this.state.target.id) }}
 						contextClose={() => this.setState({ contextMenu: null })}
-						toResize={(id) => { this.setState({toResize: id}) } }
+						toResize={(id) => { this.setState({ toResize: id }) }}
 						drawSquare={() => {
 							this.setState({ resize: true });
 							config.freezeAllDragEvents = true;

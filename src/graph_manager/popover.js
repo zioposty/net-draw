@@ -51,7 +51,9 @@ class NodePopover extends React.Component {
                     onClose={this.props.onClose}
                     disableRestoreFocus
                 >
-                    <Typography sx={{ p: 1 }}> {this.props.node.id}</Typography>
+                    <Typography sx={{ p: 1 }}> 
+                    MouseOver: {this.props.node.id} 
+                    </Typography>
                 </Popover>
             </div >
         );
