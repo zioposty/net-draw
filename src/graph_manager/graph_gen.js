@@ -126,8 +126,18 @@ class GraphGen extends React.Component {
 				idx = this.state.nodes.findIndex(n => n.isFake);
 			}
 
+			//delete fake links
+			idx = links.findIndex(l => l.isFake);
+			while (idx > -1) {
+				links.splice(idx, 1);
+				idx = links.findIndex(l => l.isFake);
+			}
+
+
 			console.log(links);
 			document.getElementById("save").disabled = false;
+			document.getElementById("load").disabled = false;
+
 
 			this.setState({
 				new_link: null,
@@ -165,7 +175,7 @@ class GraphGen extends React.Component {
 
 	loadNetwork = (event) => {
 		new Response(event.target.files[0]).json().then(json => {
-	
+
 			data.nodes = json.nodes
 			data.links = json.links
 			this.setState({
@@ -204,9 +214,34 @@ class GraphGen extends React.Component {
 			let fakeIdx = this.state.breakPoints.findIndex(n => n.id == nodeId);
 			this.state.breakPoints.splice(fakeIdx, 1);
 			this.state.nodes.splice(idx, 1);
+
+			//remove links
+			let links = this.state.links
+
+			let tIdx = links.findIndex(l => l.target == nodeId)
+			let tLink = links.splice(tIdx, 1);
+			let sIdx = links.findIndex(l => l.source == nodeId)
+
+			console.log(tIdx + " " + sIdx)
+			if (sIdx != -1) {
+				let sLink = links.splice(sIdx, 1);
+				let t = this.state.nodes.find(n => n.id == sLink[0].target);
+
+				if (t.isFake) {
+					let link = {
+						source: tLink[0].source,
+						target: sLink[0].target,
+						isFake: true
+					}
+					console.log(link)
+					links.push(link)
+				}
+			}
+
 			this.setState({
 				breakPoints: this.state.breakPoints,
 				nodes: this.state.nodes,
+				links: links
 			})
 			return;
 		}
@@ -358,6 +393,9 @@ class GraphGen extends React.Component {
 		}
 
 		document.getElementById("save").disabled = true;
+		document.getElementById("load").disabled = true;
+
+
 		var { canvas_x, canvas_y } = this.calculatePosition(evt);
 
 		if (this.state.isGridModeOn) {
@@ -388,6 +426,23 @@ class GraphGen extends React.Component {
 			x: canvas_x, y: canvas_y, fx: canvas_x, fy: canvas_y,
 		})
 
+		let lastIdx = this.state.breakPoints.length - 1;
+		if (lastIdx == 0)
+			this.state.links.push(
+				{
+					source: this.state.new_link.source,
+					target: this.state.breakPoints[0].id,
+					isFake: true
+				}
+			)
+
+		else this.state.links.push(
+			{
+				source: this.state.breakPoints[lastIdx - 1].id,
+				target: this.state.breakPoints[lastIdx].id,
+				isFake: true
+			}
+		)
 
 		console.log("BREAKPOINTS")
 		console.log(this.state.nodes)
@@ -437,6 +492,12 @@ class GraphGen extends React.Component {
 
 		links[idx].color = color;
 
+		const idx_rev = links.findIndex(l => l.source === link.target && l.target === link.source)
+		if (idx_rev != -1) {
+			links[idx_rev].color = color;
+		}
+
+
 		this.setState({
 			links: links,
 		})
@@ -477,6 +538,8 @@ class GraphGen extends React.Component {
 
 		console.log(source + " " + target);
 		document.getElementById("save").disabled = true;
+		document.getElementById("load").disabled = true;
+
 
 		let count = 0;
 
@@ -499,6 +562,35 @@ class GraphGen extends React.Component {
 			})
 			count++
 		});
+
+
+		let breakPoints = this.state.breakPoints;
+		let i = 0;
+		links.push(
+			{
+				source: link.source,
+				target: i,
+				isFake: true,
+			}
+		);
+
+		for (i = 1; i < breakPoints.length; i++) {
+			links.push(
+				{
+					source: i - 1,
+					target: i,
+					isFake: true,
+				}
+			);
+		}
+
+		links.push(
+			{
+				source: i - 1,
+				target: link.target,
+				isFake: true,
+			}
+		);
 
 
 	}
@@ -570,11 +662,11 @@ class GraphGen extends React.Component {
 			}
 		)
 
-		console.log(nodes)
 		let links = this.state.links
 
 		links.forEach(
 			l => {
+				if (l.isFake) return;
 				l.breakPoints.forEach(
 					n => {
 						n.x = Math.round(n.x / 20.0) * 20
@@ -870,10 +962,15 @@ class GraphGen extends React.Component {
 						}}
 						onRightClickLink={(evt, source, target) => {
 							toast("RightClickLink triggered: (" + source + ", " + target + ")", { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
-							evt.preventDefault(); this.setState(this.state.contextMenu === null
+							evt.preventDefault();
+
+							let t = this.state.links.find(l => l.source == source && l.target == target)
+							if (t.isFake) return;
+
+							this.setState(this.state.contextMenu === null
 								? {
 									targetType: "Link",
-									target: this.state.links.find(l => l.source === source && l.target === target),
+									target: t,
 									contextMenu: {
 										mouseX: evt.clientX - 3,
 										mouseY: evt.clientY - 5,
