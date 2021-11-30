@@ -1,7 +1,7 @@
 import { zoom } from 'd3';
 import React, { Component } from 'react'
 import ResizableRect from 'react-rectangle-resizable-rotatable-draggable'
-import { DEFAULT_GRAPH_TRANSLATE, GRAPH_ID } from './constants';
+import { DEFAULT_GRAPH_TRANSLATE, GRAPH_ID } from './utils/constants';
 
 class ResizableSquare extends Component {
     constructor(props) {

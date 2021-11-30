@@ -2,10 +2,10 @@ import './App.css';
 import { Graph } from "react-d3-graph";
 
 // caricamento Nodi da csv
-import data from "./network.json";
+import data from "./utils/network.json";
 import React from 'react';
 
-import { ROUTER, PC, PC_ICON, ROUTER_ICON, BLOCK, FAKE_ICON } from './constants';
+import { ROUTER, PC, PC_ICON, ROUTER_ICON, BLOCK, FAKE_ICON } from './utils/constants';
 import { NodeMenu, LinkMenu, BlockMenu, EditLinkMenu } from './menu';
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
@@ -20,12 +20,13 @@ import 'react-toastify/dist/ReactToastify.css';
 
 
 // General configuration of nodes
-import config from "./network-config";
+import config from "./utils/network-config";
 import { NodeContextMenu, LinkContextMenu } from './context';
 import NodePopover from './popover'
 
 import ImgTabs from './imageTab/imageTab';
 import ResizableSquare from './resizeSquare';
+import Legend from './utils/legend';
 
 
 
@@ -55,6 +56,36 @@ class GraphGen extends React.Component {
 
 		this.removeNode = this.removeNode.bind(this);
 		this.createNode = this.createNode.bind(this);
+	}
+
+
+	deleteFakes = () => {
+		let links = this.state.links
+		//delete fake nodes
+		let idx = this.state.nodes.findIndex(n => n.isFake);
+		while (idx > -1) {
+			this.state.nodes.splice(idx, 1);
+			idx = this.state.nodes.findIndex(n => n.isFake);
+		}
+
+		//delete fake links
+		idx = links.findIndex(l => l.isFake);
+		while (idx > -1) {
+			links.splice(idx, 1);
+			idx = links.findIndex(l => l.isFake);
+		}
+
+
+		document.getElementById("save").disabled = false;
+		document.getElementById("load").disabled = false;
+
+
+		this.setState({
+			new_link: null,
+			links: this.state.links,
+			breakPoints: [],
+
+		})
 	}
 
 	onDoubleClickNode(node) {
@@ -126,7 +157,7 @@ class GraphGen extends React.Component {
 				} else this.setState({menu: false})
 			}else this.setState({menu: false})
 
-			//delete fake nodes
+			/* //delete fake nodes
 			let idx = this.state.nodes.findIndex(n => n.isFake);
 			while (idx > -1) {
 				this.state.nodes.splice(idx, 1);
@@ -151,8 +182,9 @@ class GraphGen extends React.Component {
 				links: this.state.links,
 				breakPoints: [],
  
-			})
+			}) */
 
+			this.deleteFakes();
 			//document.getElementById(source +","+ target).setAttribute("marker-end", "null");
 
 
@@ -863,14 +895,19 @@ class GraphGen extends React.Component {
 				}
 				case 3: {
 					menuBody = <div style={{ float: "right", width: "20%"}}>
-						<EditLinkMenu/>	
+						<EditLinkMenu
+						exitMode={()=>{
+							this.deleteFakes()
+							this.setState(
+								{menu: false}
+							)
+						}}
+						/>	
 					</div>
 					break;
 				}
 			}			
 		}
-
-
 
 		let square = <> </>;
 		const { resize } = this.state
@@ -923,7 +960,7 @@ class GraphGen extends React.Component {
 							event.target.value = null
 						}}
 					/> </Button>
-
+					<Legend/>
 					<FormControlLabel id='grid-mod' control={<Switch onChange={(_event, checked) => {
 						this.state.isGridModeOn = checked;
 						if (checked)

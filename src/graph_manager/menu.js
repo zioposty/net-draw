@@ -273,7 +273,7 @@ class EditLinkMenu extends React.Component {
     }
     escFunction(event){
       if(event.keyCode === 27) {
-        //Do whatever when esc is pressed
+        this.props.exitMode();
       }
     }
     componentDidMount(){

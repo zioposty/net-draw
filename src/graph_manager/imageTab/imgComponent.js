@@ -3,7 +3,7 @@ import * as React from 'react';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 
-import { ROUTER, PC, PC_ICON, ROUTER_ICON, SERVER_ICON, SERVER } from '../constants';
+import { ROUTER, PC, PC_ICON, ROUTER_ICON, SERVER_ICON, SERVER } from '../utils/constants';
 
 export default function DeviceImageList(props) {
     return (

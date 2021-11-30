@@ -3,7 +3,7 @@ import * as React from 'react';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 
-import { CLOUD, CLOUD_ICON, SQUARE, SQUARE_ICON } from '../constants';
+import { CLOUD, CLOUD_ICON, SQUARE, SQUARE_ICON } from '../utils/constants';
 
 export default function BlockImageList(props) {
     return (
