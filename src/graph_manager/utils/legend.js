@@ -36,10 +36,22 @@ export default function Legend() {
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
             Draw your own network with this easy-to-use tool.
-
             Commands:
             <ul>
-                <ol>TODO</ol>
+                <li>
+                    <b>Element Info:</b> click node/link to display a menu with info and properties that you can edit
+                </li>
+                <li>
+                    <b>Node Resize:</b> right-click a node to open a context menu. From this, select "Resize"
+                    option to be able to manually resize the target.
+                </li>
+                <li>
+                    <b>Create Link:</b> double click on a source node. Then you are able to draw
+                    link segments. Double click on a target node to complete link creation.
+                </li>
+                <li>
+                    <b>Grid Mode:</b> turning on this mode, node positions is discretized, both created and future ones.
+                </li>
             </ul>
           </Typography>
         </Box>
