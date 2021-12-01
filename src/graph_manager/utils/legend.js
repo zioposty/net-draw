@@ -50,7 +50,8 @@ export default function Legend() {
                     link segments. Double click on a target node to complete link creation.
                 </li>
                 <li>
-                    <b>Grid Mode:</b> turning on this mode, node positions is discretized, both created and future ones.
+                    <b>Grid Mode:</b> turning on this mode, node positions is discretized, both created and future ones. With this, your
+                    graph accuracy is improved. 
                 </li>
             </ul>
           </Typography>

@@ -33,7 +33,7 @@ class NodeMenu extends React.Component {
         let nodes = []
         neighborhood.forEach(link => {
             let { source, target } = link;
-
+            if(link.isReturnEdge) return;
             let nodeId = source !== this.props.node ? source : target;
             let node = this.props.nodes.find(n => n.id === nodeId);
 
@@ -165,7 +165,6 @@ class BlockMenu extends React.Component {
 class LinkMenu extends React.Component {
     constructor(props) {
         super(props)
-
     }
 
     showVertex = () => {
@@ -209,6 +208,7 @@ class LinkMenu extends React.Component {
     }
 
     render() {
+                
         return (
             <div>
                 <h1> Link </h1>
@@ -219,7 +219,8 @@ class LinkMenu extends React.Component {
 
                 <FormControl component="fieldset">
                     <FormLabel component="legend">Is directed</FormLabel>
-                    <RadioGroup row aria-label="gender" name="row-radio-buttons-group" defaultValue={0}
+                    <RadioGroup row aria-label="gender" name="row-radio-buttons-group"
+                        value={this.props.directed}
                         onChange={this.handleChangeDirected}>
                         <FormControlLabel value="0" control={<Radio />} label="None" />
                         <FormControlLabel value="1" control={<Radio />} label="Yes" />
@@ -267,26 +268,26 @@ class LinkMenu extends React.Component {
 
 class EditLinkMenu extends React.Component {
 
-    constructor(props){
+    constructor(props) {
         super(props)
         this.escFunction = this.escFunction.bind(this);
     }
-    escFunction(event){
-      if(event.keyCode === 27) {
-        this.props.exitMode();
-      }
+    escFunction(event) {
+        if (event.keyCode === 27) {
+            this.props.exitMode();
+        }
     }
-    componentDidMount(){
-      document.addEventListener("keydown", this.escFunction, false);
+    componentDidMount() {
+        document.addEventListener("keydown", this.escFunction, false);
     }
-    componentWillUnmount(){
-      document.removeEventListener("keydown", this.escFunction, false);
+    componentWillUnmount() {
+        document.removeEventListener("keydown", this.escFunction, false);
     }
 
-    render(){
-      return (  
-        <h1> Edit Link Mode </h1> 
-        
+    render() {
+        return (
+            <h1> Edit Link Mode </h1>
+
         )
     }
 
