@@ -13,6 +13,7 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
+import Checkbox from '@mui/material/Checkbox';
 
 
 class NodeMenu extends React.Component {
@@ -33,7 +34,7 @@ class NodeMenu extends React.Component {
         let nodes = []
         neighborhood.forEach(link => {
             let { source, target } = link;
-            if(link.isReturnEdge) return;
+            if (link.isReturnEdge) return;
             let nodeId = source !== this.props.node ? source : target;
             let node = this.props.nodes.find(n => n.id === nodeId);
 
@@ -208,7 +209,7 @@ class LinkMenu extends React.Component {
     }
 
     render() {
-                
+        let link = this.props.link
         return (
             <div>
                 <h1> Link </h1>
@@ -228,6 +229,20 @@ class LinkMenu extends React.Component {
                     </RadioGroup>
                 </FormControl>
 
+                <Stack spacing={1} direction={"row"}></Stack>
+                <FormControlLabel id='grid-mod' control={
+                    
+                    <Checkbox
+                        onChange={(_event, checked) => {
+                            this.props.updateConnection(checked, link);
+                        }}
+                        inputProps={{ 'aria-label': 'controlled' }}
+                        checked={link.strokeDasharray !== 0}
+                        
+                    />}
+                    label="Wireless" />
+
+                <Stack />
                 <div style={{ marginTop: "5%", maxWidth: 370 }}>
                     <h2> Vertexes </h2>
                     <List sx={{ bgcolor: '#f0f0f0' }}>

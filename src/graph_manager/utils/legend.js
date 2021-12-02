@@ -37,9 +37,10 @@ export default function Legend() {
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
             Draw your own network with this easy-to-use tool.
             Commands:
-            <ul>
+          </Typography>
+          <ul>
                 <li>
-                    <b>Element Info:</b> click node/link to display a menu with info and properties that you can edit
+                    <b>Element Info:</b> click node/link to display a menu with info and properties that you can edit.
                 </li>
                 <li>
                     <b>Node Resize:</b> right-click a node to open a context menu. From this, select "Resize"
@@ -54,7 +55,6 @@ export default function Legend() {
                     graph accuracy is improved. 
                 </li>
             </ul>
-          </Typography>
         </Box>
       </Modal>
     </div>

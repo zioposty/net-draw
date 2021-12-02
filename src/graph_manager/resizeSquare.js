@@ -7,7 +7,7 @@ class ResizableSquare extends Component {
     constructor(props) {
         super(props)
 
-        let renderedNode = document.getElementById(props.node.id);
+        let renderedNode = document.getElementById(props.node.id).childNodes[0];
 
         this.state = {
             width: props.node.size.width / 10  * this.props.zoom,  //100,

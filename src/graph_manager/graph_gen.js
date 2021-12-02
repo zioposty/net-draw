@@ -1,11 +1,12 @@
 import './App.css';
 import { Graph } from "react-d3-graph";
 
+
 // caricamento Nodi da csv
 import data from "./utils/network.json";
 import React from 'react';
 
-import { ROUTER, PC, PC_ICON, ROUTER_ICON, BLOCK, FAKE_ICON } from './utils/constants';
+import { PC, PC_ICON, FAKE_ICON } from './utils/constants';
 import { NodeMenu, LinkMenu, BlockMenu, EditLinkMenu } from './menu';
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
@@ -29,12 +30,10 @@ import ResizableSquare from './resizeSquare';
 import Legend from './utils/legend';
 
 
-
 class GraphGen extends React.Component {
 	constructor(props) {
 		super(props);
 		data.focusedNodeId = null;
-
 		this.state = {
 			isGridModeOn: false,
 			nodes: data.nodes,
@@ -51,8 +50,6 @@ class GraphGen extends React.Component {
 			bidirected: false,
 			popover: false,
 		};
-
-
 
 		this.removeNode = this.removeNode.bind(this);
 		this.createNode = this.createNode.bind(this);
@@ -128,12 +125,14 @@ class GraphGen extends React.Component {
 				if (valid) {
 					let color = this.state.new_link.color;
 					let directed = this.state.new_link.directed;
+					let wireless = this.state.new_link.strokeDasharray
 
 					link = {
 						source: source, target: target,
-						color: (color == null) ? config.link.color : color,
+						color: (color === undefined) ? config.link.color : color,
 						breakPoints: this.state.breakPoints,
-						directed: directed == null ? false : directed
+						directed: directed === undefined ? false : directed,
+						strokeDasharray: wireless === undefined ? 0 : wireless
 					}
 					links.push(link);
 					if (this.state.bidirected) {
@@ -141,9 +140,11 @@ class GraphGen extends React.Component {
 
 						let otherLink = {
 							source: target, target: source,
-							color: (color == null) ? config.link.color : color,
+							color: (color === undefined) ? config.link.color : color,
 							breakPoints: bp.reverse(),
-							directed: true
+							directed: true,
+							strokeDasharray: wireless === undefined ? 0 : wireless
+
 						}
 						links.unshift(otherLink)
 					}
@@ -157,37 +158,12 @@ class GraphGen extends React.Component {
 				} else this.setState({ menu: false })
 			} else this.setState({ menu: false })
 
-			/* //delete fake nodes
-			let idx = this.state.nodes.findIndex(n => n.isFake);
-			while (idx > -1) {
-				this.state.nodes.splice(idx, 1);
-				idx = this.state.nodes.findIndex(n => n.isFake);
-			}
 
-			//delete fake links
-			idx = links.findIndex(l => l.isFake);
-			while (idx > -1) {
-				links.splice(idx, 1);
-				idx = links.findIndex(l => l.isFake);
-			}
-
-
-			console.log(links);
-			document.getElementById("save").disabled = false;
-			document.getElementById("load").disabled = false;
-
-
-			this.setState({
-				new_link: null,
-				links: this.state.links,
-				breakPoints: [],
- 
-			}) */
 
 			this.deleteFakes();
 			//document.getElementById(source +","+ target).setAttribute("marker-end", "null");
 
-
+			console.log(links)
 
 		};
 	}
@@ -540,10 +516,10 @@ class GraphGen extends React.Component {
 
 		links[idx].color = color;
 
-		const idx_rev = links.findIndex(l => l.source === link.target && l.target === link.source)
+		/* const idx_rev = links.findIndex(l => l.source === link.target && l.target === link.source)
 		if (idx_rev != -1) {
 			links[idx_rev].color = color;
-		}
+		} */
 
 
 		this.setState({
@@ -665,8 +641,9 @@ class GraphGen extends React.Component {
 		} */
 
 		console.log(config.node)
+		let id = device + Math.floor(Math.random() * 10000)
 		nodes.push({
-			id: device + Math.floor(Math.random() * 10000),
+			id: id,
 			svg: deviceImg,
 			device: device,
 			fx: x, fy: y,
@@ -678,6 +655,10 @@ class GraphGen extends React.Component {
 				width: 200
 			},
 		});
+
+		let marker = document.getElementById("marker-small").cloneNode(true);
+		marker.id = "marker-" + id
+		document.getElementsByTagName("defs")[0].appendChild(marker)
 
 		this.setState({
 			nodes: nodes,
@@ -782,7 +763,11 @@ class GraphGen extends React.Component {
 
 				console.log(bp)
 
-				let new_link = { source: target, target: source, directed: true, breakPoints: bp.reverse(),isReturnEdge: true }
+				let new_link = {
+					source: target, target: source, directed: true,
+					color: "#FFFFFF",
+					breakPoints: bp.reverse(), isReturnEdge: true, strokeDasharray: link.strokeDasharray
+				}
 				links.unshift(new_link)
 			}
 		}
@@ -796,17 +781,71 @@ class GraphGen extends React.Component {
 
 	}
 
+	updateConnection = (value, link) => {
+		let links = this.state.links;
+
+		let idx = links.findIndex(l => l.source == link.source && l.target == link.target);
+		if (idx !== -1) {
+			let link = links[idx];
+			link.strokeDasharray = (value) ? 3 : 0
+
+			/* let idxReverse = links.findIndex(l => l.source == link.target && l.target == link.source);
+			if (idxReverse !== -1) {
+				console.log("Hello there")
+				link = links[idxReverse];
+				link.strokeDasharray = (value) ? 3 : 0
+			} */
+
+			this.setState({ links: links });
+		}
+	}
+
+
+	resize = (node) => {
+		let children = document.getElementById(node.id).childNodes;
+		if (children.length == 0) return;
+		let height = children[0].getAttribute("height");
+		let width = children[0].getAttribute("width");
+		let label = children[1];
+		let pos = (node.isBlock) ? -1 : 1;
+		label.setAttribute("dy", pos * height / 2);
+
+		let links = this.state.links;
+		console.log(`width: ${width}, height ${height}`);
+		if (!node.isBlock) {
+			let marker = document.getElementById("marker-" + node.id);
+			marker.setAttribute("refX", Math.max(16, Math.sqrt((height*height)/4 + (width*width)/4)))
+
+		}
+
+		///document.getElementsByName("svg-container-graph-id")[0].appendChild(<MarkerGen links = {this.state.links}/>)
+		//document.getElementsByTagName("defs")[0].appendChild(marker);
+		this.setState({ resize: false })
+		console.log(this.state.links)
+		config.freezeAllDragEvents = false;
+		this.forceUpdate();
+	}
+
 	componentDidMount() {
+		let marker = document.getElementById("marker-small").cloneNode(true);
+		this.state.nodes.forEach(
+			node => {
+				marker.id = "marker-" + node.id
+				document.getElementsByTagName("defs")[0].appendChild(marker)		
+			}
+		)
 
 		this.state.links.forEach(
 			link => {
 				if (link.directed != null) {
 					let l = document.getElementById(link.source + "," + link.target);
-					link.directed ? l.setAttribute("marker-end", "url(#marker-small)") :
+					link.directed ? l.setAttribute("marker-end", `url(#marker-${link.target})`) :
 						l.setAttribute("marker-end", "null")
 				}
 			}
 		)
+
+
 	}
 
 	componentDidUpdate() {
@@ -815,7 +854,7 @@ class GraphGen extends React.Component {
 			link => {
 				if (link.directed != null) {
 					let l = document.getElementById(link.source + "," + link.target);
-					link.directed ? l.setAttribute("marker-end", "url(#marker-small)") :
+					link.directed ? l.setAttribute("marker-end", `url(#marker-${link.target})`) :
 						l.setAttribute("marker-end", "null")
 				}
 			}
@@ -880,7 +919,7 @@ class GraphGen extends React.Component {
 					let directed = 0;
 					let link = this.state.link_selected;
 					let links = this.state.links;
-					
+
 
 					if (link.directed) {
 						let idx = links.findIndex(l => l.source == link.target && l.target == link.source)
@@ -891,6 +930,7 @@ class GraphGen extends React.Component {
 							link={this.state.link_selected}
 							directed={directed}
 							color={this.state.temp_link_color}
+							updateConnection={(value, link) => this.updateConnection(value, link)}
 							onChangeColor={this.onChangeColor}
 							onChangeDirected={this.onChangeDirected}
 							applyColor={this.applyColorLink}
@@ -902,214 +942,203 @@ class GraphGen extends React.Component {
 						/>
 					</div>
 					break;
-			}
+				}
 				case 3: {
-				menuBody = <div style={{ float: "right", width: "20%" }}>
-					<EditLinkMenu
-						exitMode={() => {
-							this.deleteFakes()
-							this.setState(
-								{ menu: false }
-							)
-						}}
-					/>
-				</div>
-				break;
+					menuBody = <div style={{ float: "right", width: "20%" }}>
+						<EditLinkMenu
+							exitMode={() => {
+								this.deleteFakes()
+								this.setState(
+									{ menu: false }
+								)
+							}}
+						/>
+					</div>
+					break;
+				}
 			}
 		}
-	}
 
 		let square = <> </>;
-const { resize } = this.state
+		const { resize } = this.state
 
-if (resize) {
-	let node = this.state.nodes.find(n => n.id === this.state.toResize);
-	square = <ResizableSquare
-		node={node}
-		zoom={(this.state.zoom != null) ? this.state.zoom : 1}
-		resizeNode={(size) => {
-			let idx = this.state.nodes.findIndex(n => n.id == this.state.toResize);
-			this.state.nodes[idx].size = size;
-			this.setState({ nodes: this.state.nodes })
-		}}
-		endResize={() => {
-			let children = document.getElementById(node.id).childNodes;
-			if (children.length == 0) return;
-
-			if (node.isBlock) {
-				let blockHeight = children[0].getAttribute("height");
-				let blockLabel = children[1];
-				blockLabel.setAttribute("dy", -1 * blockHeight / 2)
-			}
-			else {
-				let nodeWidth = children[0].getAttribute("width");
-				let nodeLabel = children[1];
-				nodeLabel.setAttribute("dx", nodeWidth / 2)
-			}
-			this.setState({ resize: false })
-			config.freezeAllDragEvents = false;
-			this.forceUpdate();
-		}}
-	/>
-}
-else square = <> </>
-
-return (
-	<div>
-		{menuBody}
-		<div style={{ float: "left", width: "30%" }}>
-			<Button variant="outlined" id="save" onClick={this.saveNetwork}>Save Network </Button>
-			<Button variant="outlined" id="load" component="label"> Load Network <input
-				type="file"
-				hidden
-				accept=".json"
-				onChange={(evt) =>
-					this.loadNetwork(evt)
-				}
-				onClick={(event) => {
-					event.target.value = null
+		if (resize) {
+			let node = this.state.nodes.find(n => n.id === this.state.toResize);
+			square = <ResizableSquare
+				node={node}
+				zoom={(this.state.zoom != null) ? this.state.zoom : 1}
+				resizeNode={(size) => {
+					let idx = this.state.nodes.findIndex(n => n.id == this.state.toResize);
+					this.state.nodes[idx].size = size;
+					this.setState({ nodes: this.state.nodes })
 				}}
-			/> </Button>
-			<Legend />
-			<FormControlLabel id='grid-mod' control={<Switch onChange={(_event, checked) => {
-				this.state.isGridModeOn = checked;
-				if (checked)
-					this.discretization();
-			}} />}
-				label="Grid Mode" /><ImgTabs
-				createNode={this.createNode}
-				createBlock={this.createBlock} />
-
-
-			<div>
-
-			</div>
-		</div>
-		<div id="graph-struct" style={{ border: '5px solid #0048ba', height: 800, width: 800, overflow: "hidden", display: 'inline-block' }} onContextMenu={(ev) => { ev.preventDefault() }
+				endResize={() => this.resize(node)}
+			/>
 		}
-			onClick={(event) => {
-				let square = document.getElementById("ResizableSquare")
+		else square = <> </>
 
-				if (square !== null && !square.contains(event.target)) {
-					config.freezeAllDragEvents = false;
-					this.setState({ resize: false })
+		return (
+			<div>
+				{menuBody}
+				<div style={{ float: "left", width: "30%" }}>
+					<Button variant="outlined" id="save" onClick={this.saveNetwork}>Save Network </Button>
+					<Button variant="outlined" id="load" component="label"> Load Network <input
+						type="file"
+						hidden
+						accept=".json"
+						onChange={(evt) =>
+							this.loadNetwork(evt)
+						}
+						onClick={(event) => {
+							event.target.value = null
+						}}
+					/> </Button>
+					<Legend />
+					<FormControlLabel id='grid-mod' control={<Switch onChange={(_event, checked) => {
+						this.state.isGridModeOn = checked;
+						if (checked)
+							this.discretization();
+					}} />}
+						label="Grid Mode" />
+					<ImgTabs
+						createNode={this.createNode}
+						createBlock={this.createBlock} />
+
+
+					<div>
+
+					</div>
+				</div>
+				<div id="graph-struct" style={{ border: '5px solid #0048ba', height: 800, width: 800, overflow: "hidden", display: 'inline-block' }} onContextMenu={(ev) => { ev.preventDefault() }
 				}
-			}}>
+					onClick={(event) => {
+						let square = document.getElementById("ResizableSquare")
 
-			<Graph
-				id="graph-id" // id is mandatory
-				data={data}
-				config={config}
+						if (square !== null && !square.contains(event.target)) {
+							config.freezeAllDragEvents = false;
+							this.setState({ resize: false })
+						}
+					}}>
 
-				onClickNode={(id) => {
-					this.onClickNode(id)
-					toast("MouseClick triggered: " + id, { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
-				}}
-				onClickLink={(source, target) => {
-					toast("ClickLink triggered: (" + source + ", " + target + ")", { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
 
-					if (this.state.breakPoints.length == 0) {
-						let link = this.state.links.find(l => l.source === source && l.target === target);
-						this.setState({
-							menu: true, selected: 2,
-							link_selected: link,
-							temp_link_color: link.color
-						})
+					<Graph
+
+						id="graph-id" // id is mandatory
+						data={data}
+						config={config}
+
+						onClickNode={(id) => {
+							this.onClickNode(id)
+							toast("MouseClick triggered: " + id, { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
+						}}
+						onClickLink={(source, target) => {
+							toast("ClickLink triggered: (" + source + ", " + target + ")", { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
+
+							if (this.state.breakPoints.length == 0) {
+								let link = this.state.links.find(l => l.source === source && l.target === target);
+								this.setState({
+									menu: true, selected: 2,
+									link_selected: link,
+									temp_link_color: link.color
+								})
+							}
+						}
+						}
+						onDoubleClickNode={node => {
+							toast("DoubleClickNode triggered: " + node, { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
+							this.onDoubleClickNode(node);
+
+						}}
+						onMouseOverNode={(id) => {
+							// toast("MouseOver triggered " + id, { pauseOnHover: false, closeOnClick: true, autoClose: 2000})
+							let over = this.state.nodes.find(n => n.id == id)
+							if (over === undefined) return
+							this.setState({ target: over, popover: true })
+						}}
+						onMouseOutNode={(_id) => { if (this.state.popover) this.setState({ popover: false }) }}
+						onNodePositionChange={(nodeId, fx, fy) => this.onNodePositionChange(nodeId, fx, fy)}
+						onClickGraph={evt => { this.breakpointHandler(evt) }}
+						onRightClickNode={(evt, nodeID, _node) => {
+							toast("RightClickNode triggered " + nodeID, { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
+							evt.preventDefault(); this.setState(this.state.contextMenu === null
+								? {
+									targetType: "Node",
+									target: this.state.nodes.find(n => n.id == nodeID),
+									contextMenu: {
+										mouseX: evt.clientX - 3,
+										mouseY: evt.clientY - 5,
+									}
+								}
+								: { contextMenu: null });
+							console.log(this.state);
+						}}
+						onRightClickLink={(evt, source, target) => {
+							toast("RightClickLink triggered: (" + source + ", " + target + ")", { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
+							evt.preventDefault();
+
+							let t = this.state.links.find(l => l.source == source && l.target == target)
+							if (t.isFake) return;
+
+							this.setState(this.state.contextMenu === null
+								? {
+									targetType: "Link",
+									target: t,
+									contextMenu: {
+										mouseX: evt.clientX - 3,
+										mouseY: evt.clientY - 5,
+									}
+								}
+								: { contextMenu: null })
+						}}
+						onZoomChange={(_oldZoom, newZoom) => { this.setState({ zoom: newZoom }) }}
+					>
+					</Graph>
+					<ToastContainer />
+
+
+
+					{square}
+
+					{
+						(this.state.popover) ?
+							<NodePopover
+								node={this.state.target}
+								visible={this.state.popover}
+								onClose={() => this.setState({ popover: false })}
+							/>
+							: <></>
 					}
-				}
-				}
-				onDoubleClickNode={node => {
-					toast("DoubleClickNode triggered: " + node, { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
-					this.onDoubleClickNode(node);
+					<NodeContextMenu contextMenu={this.state.contextMenu}
+						target={this.state.target}
+						targetType={this.state.targetType}
+						removeNode={() => { this.setState({ contextMenu: null }); this.removeNode(this.state.target.id) }}
+						contextClose={() => this.setState({ contextMenu: null })}
+						toResize={(id) => { this.setState({ toResize: id }) }}
+						drawSquare={() => {
+							this.setState({ resize: true });
+							config.freezeAllDragEvents = true;
+							this.forceUpdate();
 
-				}}
-				onMouseOverNode={(id) => {
-					// toast("MouseOver triggered " + id, { pauseOnHover: false, closeOnClick: true, autoClose: 2000})
-					let over = this.state.nodes.find(n => n.id == id)
-					if (over === undefined) return
-					this.setState({ target: over, popover: true })
-				}}
-				onMouseOutNode={(_id) => { if (this.state.popover) this.setState({ popover: false }) }}
-				onNodePositionChange={(nodeId, fx, fy) => this.onNodePositionChange(nodeId, fx, fy)}
-				onClickGraph={evt => { this.breakpointHandler(evt) }}
-				onRightClickNode={(evt, nodeID, _node) => {
-					toast("RightClickNode triggered " + nodeID, { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
-					evt.preventDefault(); this.setState(this.state.contextMenu === null
-						? {
-							targetType: "Node",
-							target: this.state.nodes.find(n => n.id == nodeID),
-							contextMenu: {
-								mouseX: evt.clientX - 3,
-								mouseY: evt.clientY - 5,
-							}
-						}
-						: { contextMenu: null });
-					console.log(this.state);
-				}}
-				onRightClickLink={(evt, source, target) => {
-					toast("RightClickLink triggered: (" + source + ", " + target + ")", { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
-					evt.preventDefault();
+						}}
 
-					let t = this.state.links.find(l => l.source == source && l.target == target)
-					if (t.isFake) return;
-
-					this.setState(this.state.contextMenu === null
-						? {
-							targetType: "Link",
-							target: t,
-							contextMenu: {
-								mouseX: evt.clientX - 3,
-								mouseY: evt.clientY - 5,
-							}
-						}
-						: { contextMenu: null })
-				}}
-				onZoomChange={(_oldZoom, newZoom) => { this.setState({ zoom: newZoom }) }}
-
-			/>
-			<ToastContainer />
-			{square}
-
-			{
-				(this.state.popover) ?
-					<NodePopover
-						node={this.state.target}
-						visible={this.state.popover}
-						onClose={() => this.setState({ popover: false })}
 					/>
-					: <></>
-			}
-			<NodeContextMenu contextMenu={this.state.contextMenu}
-				target={this.state.target}
-				targetType={this.state.targetType}
-				removeNode={() => { this.setState({ contextMenu: null }); this.removeNode(this.state.target.id) }}
-				contextClose={() => this.setState({ contextMenu: null })}
-				toResize={(id) => { this.setState({ toResize: id }) }}
-				drawSquare={() => {
-					this.setState({ resize: true });
-					config.freezeAllDragEvents = true;
-					this.forceUpdate();
 
-				}}
+					<LinkContextMenu contextMenu={this.state.contextMenu}
+						target={this.state.target}
+						targetType={this.state.targetType}
+						removeLink={() => { this.setState({ contextMenu: null }); this.removeLink(this.state.target) }}
+						showBreakPoints={() => {
+							this.showBreakPoints(this.state.target); this.setState({
+								menu: true, selected: 3
+							})
+						}}
+						contextClose={() => this.setState({ contextMenu: null })} />
+				</div>
+				<div>
 
-			/>
-
-			<LinkContextMenu contextMenu={this.state.contextMenu}
-				target={this.state.target}
-				targetType={this.state.targetType}
-				removeLink={() => { this.setState({ contextMenu: null }); this.removeLink(this.state.target) }}
-				showBreakPoints={() => {
-					this.showBreakPoints(this.state.target); this.setState({
-						menu: true, selected: 3
-					})
-				}}
-				contextClose={() => this.setState({ contextMenu: null })} />
-		</div>
-		<div>
-
-		</div>
-	</div>
-)
+				</div>
+			</div>
+		)
 	}
 }
 

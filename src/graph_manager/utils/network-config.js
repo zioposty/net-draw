@@ -15,11 +15,12 @@ export default  {
       size: { height: 200, width: 200},
       highlightStrokeColor: "blue",
       symbolType: 'square',
-      labelPosition: "right",
+      labelPosition: "bottom",
     },
     link: {
       color: "#000000",
       opacity: 1,
+      markerHeight: 6,
       highlightColor: "lightblue",
     },
   };
