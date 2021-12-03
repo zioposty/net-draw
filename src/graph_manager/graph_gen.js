@@ -283,6 +283,9 @@ class GraphGen extends React.Component {
 										i--;
 									}
 								}
+
+								document.getElementById("marker-"+nodeId).remove();
+
 								this.setState({
 									menu: false,
 									node_selected: null,
@@ -392,6 +395,9 @@ class GraphGen extends React.Component {
 				else if (link.target === old_val) { link.target = value; }
 			}
 			)
+
+			let marker = document.getElementById("marker-" + old_val);
+			marker.id = "marker-" + value
 
 			this.setState({
 				nodes: this.state.nodes,
@@ -656,9 +662,13 @@ class GraphGen extends React.Component {
 			},
 		});
 
+		let height, width;
+		height = width = 20;
 		let marker = document.getElementById("marker-small").cloneNode(true);
 		marker.id = "marker-" + id
-		document.getElementsByTagName("defs")[0].appendChild(marker)
+		marker.setAttribute("refX", Math.max(16, Math.sqrt((height * height) / 4 + (width * width) / 4) + 4))
+
+		document.getElementsByTagName("defs")[0].appendChild(marker);
 
 		this.setState({
 			nodes: nodes,
@@ -814,7 +824,7 @@ class GraphGen extends React.Component {
 		console.log(`width: ${width}, height ${height}`);
 		if (!node.isBlock) {
 			let marker = document.getElementById("marker-" + node.id);
-			marker.setAttribute("refX", Math.max(16, Math.sqrt((height*height)/4 + (width*width)/4)))
+			marker.setAttribute("refX", Math.max(16, Math.sqrt((height * height) / 4 + (width * width) / 4) + 4))
 
 		}
 
@@ -830,8 +840,9 @@ class GraphGen extends React.Component {
 		let marker = document.getElementById("marker-small").cloneNode(true);
 		this.state.nodes.forEach(
 			node => {
+				if (node.isBlock) return;
 				marker.id = "marker-" + node.id
-				document.getElementsByTagName("defs")[0].appendChild(marker)		
+				document.getElementsByTagName("defs")[0].appendChild(marker)
 			}
 		)
 
