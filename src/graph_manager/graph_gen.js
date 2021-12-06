@@ -284,7 +284,8 @@ class GraphGen extends React.Component {
 									}
 								}
 
-								document.getElementById("marker-"+nodeId).remove();
+								let m = document.getElementById("marker-"+nodeId);
+								if( m !== undefined && m !== null) { mremove();}
 
 								this.setState({
 									menu: false,
