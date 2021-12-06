@@ -28,7 +28,6 @@ class NodeContextMenu extends React.Component {
           this.props.toResize(this.props.target.id);
           this.props.drawSquare()
         }}>Resize</MenuItem>
-        <MenuItem onClick={this.props.contextClose}>TODO</MenuItem>
 
       </Menu>
 
@@ -58,7 +57,6 @@ class LinkContextMenu extends React.Component {
         <MenuItem onClick={this.props.contextClose}> <b>{this.props.contextMenu !== null ? this.props.target.source + "; " + this.props.target.target : ""} </b></MenuItem>
         <MenuItem onClick={this.props.removeLink}>Remove</MenuItem>
         <MenuItem onClick={() => { this.props.contextClose(); this.props.showBreakPoints() }}>Edit Structure</MenuItem>
-        <MenuItem onClick={this.props.contextClose}>TODO</MenuItem>
       </Menu>
 
     )

@@ -25,12 +25,10 @@ export default function ImgTabs(props) {
                     <TabList onChange={handleChange} aria-label="lab API tabs example">
                         <Tab label="Devices" value="1" />
                         <Tab label="Blocks" value="2" />
-                        <Tab label="Item Three" value="3" />
                     </TabList>
                 </Box>
                 <TabPanel value="1"><DeviceImageList createNode = {props.createNode}/></TabPanel>
                 <TabPanel value="2"><BlockImageList createBlock = {props.createBlock}/></TabPanel>
-                <TabPanel value="3">Item Three</TabPanel>
             </TabContext>
         </Box>
     );
