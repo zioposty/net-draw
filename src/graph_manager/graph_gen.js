@@ -1052,7 +1052,7 @@ class GraphGen extends React.Component {
 		return (
 			<div>
 				{menuBody}
-				<div style={{ float: "left", width: "30%" }}>
+				<div style={{ float: "left", width: "20%" }}>
 					<Button variant="outlined" id="save" onClick={this.saveNetwork}>Save Network </Button>
 					<Button variant="outlined" id="load" component="label"> Load Network <input
 						type="file"
@@ -1081,7 +1081,7 @@ class GraphGen extends React.Component {
 
 					</div>
 				</div>
-				<div id="graph-struct" style={{ border: '5px solid #0048ba', height: 800, width: 800, overflow: "hidden", display: 'inline-block' }} onContextMenu={(ev) => { ev.preventDefault() }
+				<div id="graph-struct" style={{ border: '5px solid #0048ba', height: "80%", width: "55%", overflow: "hidden", display: 'inline-block' }} onContextMenu={(ev) => { ev.preventDefault() }
 				}
 					onClick={(event) => {
 						let square = document.getElementById("ResizableSquare")

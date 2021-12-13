@@ -7,9 +7,9 @@ import { ROUTER, PC, PC_ICON, ROUTER_ICON, SERVER_ICON, SERVER } from '../utils/
 
 export default function DeviceImageList(props) {
     return (
-        <ImageList sx={{ width: 500, height: 200 }} cols={3}>
+        <ImageList sx={{ width: "100%", height: 300 }} cols={2}>
             {deviceData.map((device) => (
-                <ImageListItem key={device.img} style={{ height: '120px', width: '70px' }}>
+                <ImageListItem key={device.img} style={{ width:"50%"}}>
                     <img style={{
                         position: "absolute",
                         margin: "auto",
