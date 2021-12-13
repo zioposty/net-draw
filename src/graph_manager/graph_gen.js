@@ -49,6 +49,7 @@ class GraphGen extends React.Component {
 			resize: false,
 			bidirected: false,
 			popover: false,
+			blocks: [],
 		};
 
 		this.removeNode = this.removeNode.bind(this);
@@ -76,14 +77,48 @@ class GraphGen extends React.Component {
 		document.getElementById("save").disabled = false;
 		document.getElementById("load").disabled = false;
 
-
+		this.showBlocks()
 		this.setState({
 			new_link: null,
 			links: this.state.links,
 			breakPoints: [],
-
+			blocks: [],
 		})
 	}
+
+	hideBlocks = () => {
+
+		let blocks = [];
+		let nodes = this.state.nodes;
+
+		for (let i = 0; i < nodes.length; i++) {
+			let n = nodes[i];
+			if (n.isBlock) {
+				blocks.push(nodes.splice(i, 1)[0])
+				i--;
+			}
+		}
+		console.log(nodes)
+		this.setState(
+			{
+				blocks: blocks
+			}
+		)
+
+
+	}
+
+	showBlocks = () => {
+		let blocks = this.state.blocks;
+		let nodes = this.state.nodes;
+
+		blocks.forEach(
+			b => {
+				nodes.unshift(b);
+			}
+		) 
+	}
+
 
 	onDoubleClickNode(node) {
 
@@ -104,6 +139,7 @@ class GraphGen extends React.Component {
 
 			})
 
+			this.hideBlocks();
 		}
 		else {
 			let link = null;
@@ -159,10 +195,10 @@ class GraphGen extends React.Component {
 			} else this.setState({ menu: false })
 
 
-
+			console.log("--- INFO ---")
+			console.log(this.state)
 			this.deleteFakes();
 			//document.getElementById(source +","+ target).setAttribute("marker-end", "null");
-
 			console.log(links)
 
 		};
@@ -284,8 +320,8 @@ class GraphGen extends React.Component {
 									}
 								}
 
-								let m = document.getElementById("marker-"+nodeId);
-								if( m !== undefined && m !== null) { m.remove();}
+								let m = document.getElementById("marker-" + nodeId);
+								if (m !== undefined && m !== null) { m.remove(); }
 
 								this.setState({
 									menu: false,
@@ -374,12 +410,12 @@ class GraphGen extends React.Component {
 	}
 
 	updateNodeName = (value, old_val) => {
-
 		if (!isNaN(Number(value))) {
 			window.alert("Not a valid name");
 			return;
 		}
-		console.log(this.state.nodes);
+
+		value = value.replace(/\s/g, '');
 		const idx = this.state.nodes.findIndex(node => node.id === value)
 		console.log(idx);
 		if (idx == -1) {
@@ -391,14 +427,18 @@ class GraphGen extends React.Component {
 			}
 
 			this.state.nodes[idx].id = value;
-			this.state.links.forEach(link => {
-				if (link.source === old_val) { link.source = value; }
-				else if (link.target === old_val) { link.target = value; }
-			}
-			)
 
-			let marker = document.getElementById("marker-" + old_val);
-			marker.id = "marker-" + value
+			if (!this.state.nodes[idx].isBlock) {
+				this.state.links.forEach(link => {
+					if (link.source === old_val) { link.source = value; }
+					else if (link.target === old_val) { link.target = value; }
+				}
+				)
+
+				let marker = document.getElementById("marker-" + old_val);
+				marker.id = "marker-" + value
+
+			}
 
 			this.setState({
 				nodes: this.state.nodes,
@@ -411,19 +451,7 @@ class GraphGen extends React.Component {
 		}
 	}
 
-	breakpointHandler = (evt) => {
-		//calcute coordinate on svg
-
-		if (this.state.new_link == null) {
-			this.state.breakPoints = []
-			return;
-		}
-
-		document.getElementById("save").disabled = true;
-		document.getElementById("load").disabled = true;
-
-
-		var { canvas_x, canvas_y } = this.calculatePosition(evt);
+	createFakeNode = (canvas_x, canvas_y) => {
 
 		if (this.state.isGridModeOn) {
 			canvas_x = Math.round(canvas_x / 20) * 20 //+ 7.5 // size = 50 / 2 * 10, 10 because size 10 means 1 pixel
@@ -478,6 +506,25 @@ class GraphGen extends React.Component {
 		console.log("BREAKPOINTS")
 		console.log(this.state.nodes)
 		this.setState({ breakPoints: this.state.breakPoints });
+	}
+
+	breakpointHandler = (evt) => {
+		//calcute coordinate on svg
+
+		console.log("GRAPH CLICK")
+		if (this.state.new_link == null) {
+			this.state.breakPoints = []
+			return;
+		}
+
+		document.getElementById("save").disabled = true;
+		document.getElementById("load").disabled = true;
+
+
+		var { canvas_x, canvas_y } = this.calculatePosition(evt);
+
+		this.createFakeNode(canvas_x, canvas_y)
+
 	}
 
 	calculatePosition = (evt) => {
@@ -571,10 +618,12 @@ class GraphGen extends React.Component {
 		this.state.bidirected = this.removeLink(link);
 
 		console.log(source + " " + target);
+		console.log(link);
+
 		document.getElementById("save").disabled = true;
 		document.getElementById("load").disabled = true;
 
-		if (breakPoints.length == 0) {
+		if (link.breakPoints.length == 0) {
 
 			return;
 		}
@@ -587,7 +636,7 @@ class GraphGen extends React.Component {
 				id: count,
 				fx: fakeNode.x, fy: fakeNode.y,
 				x: fakeNode.x, y: fakeNode.y,
-				isFake: true, svg: FAKE_ICON,
+				isFake: true, svg: FAKE_ICON, isBlock: false,
 				size: {
 					height: 50,
 					width: 50
@@ -599,13 +648,14 @@ class GraphGen extends React.Component {
 				fx: fakeNode.x, fy: fakeNode.y,
 				x: fakeNode.x, y: fakeNode.y,
 			})
+			
 			count++
+			console.log(count)
 		});
 
-
+		console.log("HELLO THERE")
+		console.log(this.state)
 		let i = 0;
-
-
 
 		links.push(
 			{
@@ -825,7 +875,7 @@ class GraphGen extends React.Component {
 		console.log(`width: ${width}, height ${height}`);
 		if (!node.isBlock) {
 			let marker = document.getElementById("marker-" + node.id);
-			marker.setAttribute("refX", Math.max(16, Math.sqrt((height * height) / 4 + (width * width) / 4) + 4))
+			marker.setAttribute("refX", Math.max(16, Math.sqrt((height * height) / 4 + (width * width) / 4)))
 
 		}
 
@@ -900,7 +950,17 @@ class GraphGen extends React.Component {
 						<NodeMenu
 							node={this.state.node_selected}
 							removeNode={() => this.removeNode(this.state.node_selected)}
-							updateNodeName={this.updateNodeName}
+							updateNodeName={(old_value, value) => {
+								this.updateNodeName(old_value, value)
+								this.forceUpdate();
+								let n = document.getElementById(value);
+								if (n !== null && n !== undefined) {
+									console.log("STO CA")
+									let children = n.childNodes;
+									let label = children[1];
+									label.setAttribute("dy", 1000);
+								}
+							}}
 							links={this.state.links}
 							nodes={this.state.nodes}
 							clickNeighbor={this.onClickNode}
