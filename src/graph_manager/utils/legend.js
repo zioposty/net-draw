@@ -16,14 +16,14 @@ const style = {
   p: 4,
 };
 
-export default function Legend() {
+function Legend() {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   return (
     <div>
-      <Button variant='outlined' onClick={handleOpen}>Help</Button>
+      <Button variant='outlined' onClick={handleOpen}>Commands</Button>
       <Modal
         open={open}
         onClose={handleClose}
@@ -60,3 +60,49 @@ export default function Legend() {
     </div>
   );
 }
+
+function Tips() {
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  return (
+    <div>
+      <Button variant='outlined' onClick={handleOpen}>Tips</Button>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Follow these tips for <b>Net-Draw</b> usage to get the best experience
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            This application allows to create, resize and rename nodes, customize links color and their shapes.
+            It is built on top of <b>react-d3-graph</b>.
+            Tips:
+          </Typography>
+          <ul>
+                <li>
+                    <b>Canvas</b>: don't lost your node on canvas. Nodes are created in a fixed position. Focus mechanism need to be introduced. 
+                </li>
+                <li>
+                    <b>Blocks management</b>: every object on this canvas is a node. For this reason, during link creation blocks are hidden to
+                    avoid problems, because you can't select a breakpoint over a node.
+                </li>
+                <li>
+                    <b>Node name limitations</b>: A node name (included blocks) needs to be unique, alpha-numeric and without spaces to provide some features.
+                    There are input controls to avoid not allowed names.
+
+                </li>
+            </ul>
+        </Box>
+      </Modal>
+    </div>
+  );
+}
+
+
+export {Legend, Tips}

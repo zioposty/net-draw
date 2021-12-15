@@ -1,5 +1,6 @@
 export default  {
     height: 800,
+    width: "100%",
     maxZoom: 7,
     minZoom: 1,
     highlightOpacity: 0.4,

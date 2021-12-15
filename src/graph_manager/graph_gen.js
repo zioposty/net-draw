@@ -27,7 +27,8 @@ import NodePopover from './popover'
 
 import ImgTabs from './imageTab/imageTab';
 import ResizableSquare from './resizeSquare';
-import Legend from './utils/legend';
+import {Legend, Tips} from './utils/legend';
+import { Stack } from '@mui/material';
 
 
 class GraphGen extends React.Component {
@@ -426,9 +427,10 @@ class GraphGen extends React.Component {
 				return;
 			}
 
-			this.state.nodes[idx].id = value;
-
-			if (!this.state.nodes[idx].isBlock) {
+			
+			let node = this.state.nodes[idx];
+			node.id = value
+			if (!node.isBlock) {
 				this.state.links.forEach(link => {
 					if (link.source === old_val) { link.source = value; }
 					else if (link.target === old_val) { link.target = value; }
@@ -437,14 +439,15 @@ class GraphGen extends React.Component {
 
 				let marker = document.getElementById("marker-" + old_val);
 				marker.id = "marker-" + value
-
 			}
 
 			this.setState({
 				nodes: this.state.nodes,
 				node_selected: value
 			});
-
+			
+			this.forceUpdate(() => this.resize(node))
+			
 		}
 		else {
 			window.alert("Name " + value + " already used");
@@ -952,14 +955,6 @@ class GraphGen extends React.Component {
 							removeNode={() => this.removeNode(this.state.node_selected)}
 							updateNodeName={(old_value, value) => {
 								this.updateNodeName(old_value, value)
-								this.forceUpdate();
-								let n = document.getElementById(value);
-								if (n !== null && n !== undefined) {
-									console.log("STO CA")
-									let children = n.childNodes;
-									let label = children[1];
-									label.setAttribute("dy", 1000);
-								}
 							}}
 							links={this.state.links}
 							nodes={this.state.nodes}
@@ -1065,7 +1060,7 @@ class GraphGen extends React.Component {
 							event.target.value = null
 						}}
 					/> </Button>
-					<Legend />
+					<Stack direction={'row'}><Legend /><Tips /></Stack>
 					<FormControlLabel id='grid-mod' control={<Switch onChange={(_event, checked) => {
 						this.state.isGridModeOn = checked;
 						if (checked)
@@ -1094,7 +1089,6 @@ class GraphGen extends React.Component {
 
 
 					<Graph
-
 						id="graph-id" // id is mandatory
 						data={data}
 						config={config}
