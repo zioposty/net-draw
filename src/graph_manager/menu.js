@@ -16,17 +16,95 @@ import FormLabel from '@mui/material/FormLabel';
 import Checkbox from '@mui/material/Checkbox';
 
 
-class NodeMenu extends React.Component {
+class AllNodesList extends React.Component {
     constructor(props) {
         super(props)
         this.state = { value: props.node };
         this.handleChange = this.handleChange.bind(this);
+        this.escFunction = this.escFunction.bind(this);
     }
 
     handleChange(event) {
         this.setState({ value: event.target.value });
     }
 
+    escFunction(event) {
+        if (event.keyCode === 27) {
+            this.props.closeMenu();
+        }
+    }
+    componentDidMount() {
+        document.addEventListener("keydown", this.escFunction, false);
+    }
+    componentWillUnmount() {
+        document.removeEventListener("keydown", this.escFunction, false);
+    }
+
+    createList = () => {
+        let nodes = this.props.nodes;
+        console.log(nodes)
+        let allNodes = []
+        nodes.forEach(node => {
+
+            allNodes.push(
+                <ListItem key={"listitem-" + node.id} onDoubleClick={() => { this.props.clickNode(node.id) }}
+                    style={{ cursor: 'pointer' }}>
+                    <ListItemAvatar>
+                        <Avatar alt={node.id} src={node.svg} />
+                    </ListItemAvatar>
+                    <ListItemText
+                        primary={node.id}
+                        secondary={node.device}
+                    />
+                </ListItem>
+            )
+
+        });
+
+        return allNodes;
+    }
+
+    render() {
+        return (
+            <div >
+                <div style={{ marginTop: "5%", maxWidth: 370}}>
+                    <h2> Graph nodes </h2>
+                    <List sx={{ bgcolor: '#f0f0f0', maxHeight: '300px', overflow:'auto' }}>
+                        {
+                            this.createList()
+                        }
+                    </List>
+                </div>
+            </div>
+        )
+    }
+}
+
+
+
+class NodeMenu extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = { value: props.node };
+        this.handleChange = this.handleChange.bind(this);
+        this.escFunction = this.escFunction.bind(this);
+    }
+
+    handleChange(event) {
+        this.setState({ value: event.target.value });
+    }
+
+    escFunction(event) {
+        if (event.keyCode === 27) {
+            this.props.closeMenu();
+        }
+    }
+    componentDidMount() {
+        document.addEventListener("keydown", this.escFunction, false);
+    }
+    componentWillUnmount() {
+        document.removeEventListener("keydown", this.escFunction, false);
+    }
 
     createNeighborhoodList = () => {
         let neighborhood = this.props.links.filter(n => n.source === this.props.node || n.target === this.props.node);
@@ -98,6 +176,19 @@ class BlockMenu extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeH = this.handleChangeH.bind(this);
         this.handleChangeW = this.handleChangeW.bind(this);
+        this.escFunction = this.escFunction.bind(this);
+    }
+
+    escFunction(event) {
+        if (event.keyCode === 27) {
+            this.props.closeMenu();
+        }
+    }
+    componentDidMount() {
+        document.addEventListener("keydown", this.escFunction, false);
+    }
+    componentWillUnmount() {
+        document.removeEventListener("keydown", this.escFunction, false);
     }
 
     handleChange(event) {
@@ -166,6 +257,7 @@ class BlockMenu extends React.Component {
 class LinkMenu extends React.Component {
     constructor(props) {
         super(props)
+        this.escFunction = this.escFunction.bind(this);
     }
 
     showVertex = () => {
@@ -207,6 +299,19 @@ class LinkMenu extends React.Component {
     handleChangeDirected = (event, value) => {
         this.props.onChangeDirected(value, this.props.link)
     }
+
+    escFunction(event) {
+        if (event.keyCode === 27) {
+            this.props.closeMenu();
+        }
+    }
+    componentDidMount() {
+        document.addEventListener("keydown", this.escFunction, false);
+    }
+    componentWillUnmount() {
+        document.removeEventListener("keydown", this.escFunction, false);
+    }
+
 
     render() {
         let link = this.props.link
@@ -308,4 +413,4 @@ class EditLinkMenu extends React.Component {
 
 }
 
-export { NodeMenu, LinkMenu, BlockMenu, EditLinkMenu };
+export { NodeMenu, LinkMenu, BlockMenu, EditLinkMenu, AllNodesList };

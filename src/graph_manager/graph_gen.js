@@ -7,7 +7,7 @@ import data from "./utils/network.json";
 import React from 'react';
 
 import { PC, PC_ICON, FAKE_ICON } from './utils/constants';
-import { NodeMenu, LinkMenu, BlockMenu, EditLinkMenu } from './menu';
+import { NodeMenu, LinkMenu, BlockMenu, EditLinkMenu, AllNodesList } from './menu';
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css';
@@ -27,7 +27,7 @@ import NodePopover from './popover'
 
 import ImgTabs from './imageTab/imageTab';
 import ResizableSquare from './resizeSquare';
-import {Legend, Tips} from './utils/legend';
+import { Legend, Tips } from './utils/legend';
 import { Stack } from '@mui/material';
 
 
@@ -117,7 +117,7 @@ class GraphGen extends React.Component {
 			b => {
 				nodes.unshift(b);
 			}
-		) 
+		)
 	}
 
 
@@ -427,7 +427,7 @@ class GraphGen extends React.Component {
 				return;
 			}
 
-			
+
 			let node = this.state.nodes[idx];
 			node.id = value
 			if (!node.isBlock) {
@@ -445,9 +445,9 @@ class GraphGen extends React.Component {
 				nodes: this.state.nodes,
 				node_selected: value
 			});
-			
+
 			this.forceUpdate(() => this.resize(node))
-			
+
 		}
 		else {
 			window.alert("Name " + value + " already used");
@@ -651,7 +651,7 @@ class GraphGen extends React.Component {
 				fx: fakeNode.x, fy: fakeNode.y,
 				x: fakeNode.x, y: fakeNode.y,
 			})
-			
+
 			count++
 			console.log(count)
 		});
@@ -956,6 +956,7 @@ class GraphGen extends React.Component {
 							updateNodeName={(old_value, value) => {
 								this.updateNodeName(old_value, value)
 							}}
+							closeMenu={() => this.setState({ menu: false })}
 							links={this.state.links}
 							nodes={this.state.nodes}
 							clickNeighbor={this.onClickNode}
@@ -976,8 +977,9 @@ class GraphGen extends React.Component {
 								let idx = this.state.nodes.findIndex(n => n.id == this.state.node_selected);
 								this.state.nodes[idx].size = size;
 								this.setState({ nodes: this.state.nodes })
-							}
-							}
+							}}
+							closeMenu={() => this.setState({ menu: false })}
+
 						/>
 					</div>
 					break;
@@ -1005,6 +1007,7 @@ class GraphGen extends React.Component {
 							links={this.state.links}
 							nodes={this.state.nodes}
 							clickNeighbor={this.onClickNode}
+							closeMenu={() => this.setState({ menu: false })}
 
 						/>
 					</div>
@@ -1024,6 +1027,14 @@ class GraphGen extends React.Component {
 					break;
 				}
 			}
+		}
+		else {
+			menuBody = <div style={{ float: "right", width: "20%" }}>
+				<AllNodesList
+					nodes={this.state.nodes}
+					clickNode={(nodeId) => { this.onClickNode(nodeId) }}
+				/>
+			</div>
 		}
 
 		let square = <> </>;

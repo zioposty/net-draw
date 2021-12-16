@@ -8,7 +8,7 @@ import { CLOUD, CLOUD_ICON, SQUARE, SQUARE_ICON } from '../utils/constants';
 
 export default function BlockImageList(props) {
     return (
-        <ImageList sx={{ width: "100%", height: 150 }} cols={2}>
+        <ImageList sx={{ width: "100%", height: 350 }} cols={2}>
             {deviceData.map((device) => (
                 <ImageListItem key={device.img} style={{width: "50%"}}>
                     <img style={{
