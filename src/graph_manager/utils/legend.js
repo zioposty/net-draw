@@ -86,6 +86,9 @@ function Tips() {
           </Typography>
           <ul>
                 <li>
+                    <b>Number of Nodes</b>: react-d3-graph needs at least one node, so if you remove last node the network will be reset.
+                </li>
+                <li>
                     <b>Canvas</b>: don't lost your node on canvas. Nodes are created in a fixed position. Focus mechanism need to be introduced. 
                 </li>
                 <li>
