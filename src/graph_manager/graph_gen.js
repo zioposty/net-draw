@@ -385,11 +385,12 @@ class GraphGen extends React.Component {
 		}
 
 
-		let idxPos = nodes.findIndex(n => n.x == fx && n.y == fy && !n.isBlock)
+		if (!nodes[idx].isBlock) {
+			let idxPos = nodes.findIndex(n => n.x == fx && n.y == fy && !n.isBlock)
 
-		fx = (idxPos === -1) ? fx : nodes[idx].x
-		fy = (idxPos === -1) ? fy : nodes[idx].y
-
+			fx = (idxPos === -1) ? fx : nodes[idx].x
+			fy = (idxPos === -1) ? fy : nodes[idx].y
+		}
 		nodes[idx].fx = fx;
 		nodes[idx].fy = fy;
 		nodes[idx].x = fx;
@@ -397,7 +398,6 @@ class GraphGen extends React.Component {
 
 
 		if (nodes[idx].isFake) {
-			console.log("UPDATE FAKE POS")
 			console.log(this.state.breakPoints);
 			console.log(this.state.nodes);
 			let fake = this.state.breakPoints.find(n => n.id === nodes[idx].id)
