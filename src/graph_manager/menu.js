@@ -14,6 +14,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import Checkbox from '@mui/material/Checkbox';
+import { Stroller } from '@mui/icons-material';
 
 
 class AllNodesList extends React.Component {
@@ -67,9 +68,9 @@ class AllNodesList extends React.Component {
     render() {
         return (
             <div >
-                <div style={{ marginTop: "5%", maxWidth: 370}}>
+                <div style={{ marginTop: "5%", maxWidth: 370 }}>
                     <h2> Graph nodes </h2>
-                    <List sx={{ bgcolor: '#f0f0f0', maxHeight: '300px', overflow:'auto' }}>
+                    <List sx={{ bgcolor: '#f0f0f0', maxHeight: '300px', overflow: 'auto' }}>
                         {
                             this.createList()
                         }
@@ -257,7 +258,13 @@ class BlockMenu extends React.Component {
 class LinkMenu extends React.Component {
     constructor(props) {
         super(props)
+        
+        // this.state = {
+        //     stroke: props.stroke
+        // }
+
         this.escFunction = this.escFunction.bind(this);
+        // this.handleChangeStroke = this.handleChangeStroke.bind(this);
     }
 
     showVertex = () => {
@@ -296,6 +303,17 @@ class LinkMenu extends React.Component {
 
     }
 
+
+    /* handleChangeStroke(event){
+        let stroke = event.target.value;
+
+        stroke = (Number.isInteger(Number.parseInt(stroke)) && stroke > 0) ? stroke : this.state.stroke
+
+        this.setState({
+            stroke: stroke
+        });
+    } */
+
     handleChangeDirected = (event, value) => {
         this.props.onChangeDirected(value, this.props.link)
     }
@@ -318,11 +336,6 @@ class LinkMenu extends React.Component {
         return (
             <div>
                 <h1> Link </h1>
-                {/* <FormControlLabel control={
-                    <Checkbox checked={this.props.directed} onChange={(event) => this.props.onChangeDirected(event.target.checked, this.props.link)} />}
-                    label="Directed"
-                /> */}
-
                 <FormControl component="fieldset">
                     <FormLabel component="legend">Is directed</FormLabel>
                     <RadioGroup row aria-label="gender" name="row-radio-buttons-group"
@@ -336,14 +349,14 @@ class LinkMenu extends React.Component {
 
                 <Stack spacing={1} direction={"row"}></Stack>
                 <FormControlLabel id='grid-mod' control={
-                    
+
                     <Checkbox
                         onChange={(_event, checked) => {
                             this.props.updateConnection(checked, link);
                         }}
                         inputProps={{ 'aria-label': 'controlled' }}
                         checked={link.strokeDasharray !== 0}
-                        
+
                     />}
                     label="Wireless" />
 
@@ -379,6 +392,15 @@ class LinkMenu extends React.Component {
 
 
                     </Stack>
+                </div>
+                <div style={{ marginTop: "5%" }}> 
+                    {/* <form onSubmit={(event) => { event.preventDefault(); console.log(this.state); this.props.updateStroke(this.state.stroke) }}>
+                        <Stack spacing={1} direction="row">
+                            <Button type="submit" variant='outlined'>Resize</Button>
+                        </Stack>
+                    </form> */}
+                    <TextField type="number" value={this.props.stroke} id="new-stroke" label={"Stroke Width"} variant="outlined" onChange={(event) => { this.props.updateStroke(event.target.value, this.props.link)}} />
+
                 </div>
                 <Button style={{ marginTop: "5%" }} onClick={this.props.removeLink} variant='outlined'>Remove Link</Button>
             </div>

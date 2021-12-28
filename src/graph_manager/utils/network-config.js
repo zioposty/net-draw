@@ -23,5 +23,7 @@ export default  {
       opacity: 1,
       markerHeight: 6,
       highlightColor: "lightblue",
+      semanticStrokeWidth: true,
+      strokeWidth: 2 
     },
   };
