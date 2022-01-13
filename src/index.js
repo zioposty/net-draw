@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import GraphGen from './graph_manager/graph_gen';
 import reportWebVitals from './reportWebVitals';
-import { Node } from 'react-d3-graph';
 
 
 
