@@ -1,28 +1,28 @@
 {
-  "name": "d3-graph-test",
+  "name": "net-draw",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@emotion/react": "^11.5.0",
-    "@emotion/styled": "^11.3.0",
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
     "@material-ui/core": "^5.0.0-beta.5",
-    "@mui/icons-material": "^5.2.0",
-    "@mui/lab": "^5.0.0-alpha.54",
-    "@mui/material": "^5.1.0",
-    "@testing-library/jest-dom": "^5.15.0",
+    "@mui/icons-material": "^5.8.0",
+    "@mui/lab": "^5.0.0-alpha.82",
+    "@mui/material": "^5.8.0",
+    "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
-    "d3": "^5.5.0",
+    "d3": "^5.16.0",
     "material-ui-color-picker": "^3.5.1",
     "react": "^17.0.2",
-    "react-confirm-alert": "^2.7.0",
+    "react-confirm-alert": "^2.8.0",
     "react-d3-graph": "^2.6.0",
     "react-dom": "^17.0.2",
     "react-motion": "^0.5.2",
     "react-rectangle-resizable-rotatable-draggable": "^1.1.0",
-    "react-scripts": "4.0.3",
-    "react-toastify": "^8.1.0",
-    "styled-components": "^5.3.3",
+    "react-scripts": "^5.0.1",
+    "react-toastify": "^8.2.0",
+    "styled-components": "^5.3.5",
     "web-vitals": "^1.1.2"
   },
   "scripts": {
@@ -51,7 +51,7 @@
     ]
   },
   "devDependencies": {
-    "@types/react": "^17.0.34",
-    "@types/react-d3-graph": "^2.6.1"
+    "@types/react": "^17.0.45",
+    "@types/react-d3-graph": "^2.6.3"
   }
 }
