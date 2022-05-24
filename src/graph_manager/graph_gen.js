@@ -49,6 +49,7 @@ class GraphGen extends React.Component {
 			temp_link_color: config.link.color,
 			temp_stroke: config.link.strokeWidth,
 			resize: false,
+			toResize: null,
 			bidirected: false,
 			popover: false,
 			blocks: [],
@@ -121,10 +122,60 @@ class GraphGen extends React.Component {
 		)
 	}
 
+	createMarkerLink = (link , links) => {
+		let source = link.source;
+		let target = link.target;
 
-	onDoubleClickNode(node) {
+		let s = this.state.nodes.find(n => n.id === source);
+		let height, width;
 
-		let n = this.state.nodes.find(n => n.id == node);
+		height = s.size.height / 10;
+		width = s.size.width / 10;
+		let lName = target + "," + source;
+		let marker = document.getElementById("marker-small").cloneNode(true);
+		marker.id = "marker-" + lName
+
+		let l = document.getElementById(marker.id);
+		if (l !== undefined && l !== null) {
+			l.remove();
+		}
+
+		marker.setAttribute("refX", Math.max(Math.sqrt( ((height * height) / 4 + (width * width) / 4) / link.strokeWidth ) + 5/link.strokeWidth))  //stroke Weight
+		document.getElementsByTagName("defs")[0].appendChild(marker);
+
+
+		let t = this.state.nodes.find(n => n.id === target);
+		height = t.size.height / 10;
+		width = t.size.width / 10;
+		lName = source + "," + target;
+		marker = document.getElementById("marker-small").cloneNode(true);
+		marker.id = "marker-" + lName
+		marker.setAttribute("refX", Math.max( Math.sqrt(((height * height) / 4 + (width * width) / 4) / link.strokeWidth) + 5/link.strokeWidth ))  //stroke Weight
+		document.getElementsByTagName("defs")[0].appendChild(marker);
+
+
+		if (this.state.bidirected) {
+			let bp = [...link.breakPoints]
+
+			let otherLink = {
+				source: target, target: source,
+				isReverseEdge: true,
+				strokeDasharray: link.strokeDasharray,
+				strokeWidth: link.strokeWidth,
+				color: "#FFFFFF",
+				breakPoints: bp.reverse(),
+				directed: true,
+			}
+
+			links.unshift(otherLink)
+
+		}
+
+	}
+
+	onDoubleClickNode(node) {   // to create links	
+
+		let n = this.state.nodes.find(n => n.id === node);
 
 		if (n.isFake || n.isBlock) return
 
@@ -152,8 +203,8 @@ class GraphGen extends React.Component {
 			if (source !== target) {
 				let valid = true;
 				for (let i = 0; i < this.state.links.length; i++) {
-					if ((links[i].source == source && links[i].target == target)
-						|| (this.state.links[i].source == target && this.state.links[i].target == source)) {
+					if ((links[i].source === source && links[i].target === target)
+						|| (this.state.links[i].source === target && this.state.links[i].target === source)) {
 						valid = false;
 						break;
 					}
@@ -175,72 +226,27 @@ class GraphGen extends React.Component {
 						strokeWidth: stroke === undefined ? config.link.strokeWidth : stroke
 					}
 
-
-
 					links.push(link);
-
-					let s = this.state.nodes.find(n => n.id == source);
-					let height, width;
-
-					height = s.size.height / 10;
-					width = s.size.width / 10;
-					let lName = target + "," + source;
-					let marker = document.getElementById("marker-small").cloneNode(true);
-					marker.id = "marker-" + lName
-					marker.setAttribute("refX", Math.max(Math.sqrt( ((height * height) / 4 + (width * width) / 4) / link.strokeWidth ) + 5/link.strokeWidth))  //stroke Weight
-					document.getElementsByTagName("defs")[0].appendChild(marker);
-
-
-					let t = this.state.nodes.find(n => n.id == target);
-					height = t.size.height / 10;
-					width = t.size.width / 10;
-					lName = source + "," + target;
-					marker = document.getElementById("marker-small").cloneNode(true);
-					marker.id = "marker-" + lName
-					marker.setAttribute("refX", Math.max( Math.sqrt(((height * height) / 4 + (width * width) / 4) / link.strokeWidth) + 5/link.strokeWidth ))  //stroke Weight
-					document.getElementsByTagName("defs")[0].appendChild(marker);
-
-
-					if (this.state.bidirected) {
-						let bp = [...link.breakPoints]
-
-						let otherLink = {
-							source: target, target: source,
-							isReverseEdge: true,
-							strokeDasharray: link.strokeDasharray,
-							strokeWidth: link.strokeWidth,
-							color: "#FFFFFF",
-							breakPoints: bp.reverse(),
-							directed: true,
-						}
-
-						links.unshift(otherLink)
-
-					}
+					this.createMarkerLink(link, this.state.links);
 
 					this.setState({
 						menu: true,
 						selected: 2,
-						link_selected: link
+						link_selected: link,
+						links: links
 					})
-
+					this.forceUpdate();
 				} else this.setState({ menu: false })
 			} else this.setState({ menu: false })
 
-
-			console.log("--- INFO ---")
-			console.log(this.state)
 			this.deleteFakes();
-			//document.getElementById(source +","+ target).setAttribute("marker-end", "null");
-			console.log(links)
-
 		};
 	}
 
 	onClickNode = (nodeId) => {
-		let node = this.state.nodes.find(n => n.id == nodeId);
+		let node = this.state.nodes.find(n => n.id === nodeId);
 
-		if (this.state.breakPoints.length == 0) {
+		if (this.state.breakPoints.length === 0) {
 			//data.focusedNodeId = nodeId;
 			this.setState({ menu: true, selected: node.isBlock ? 1 : 0, node_selected: nodeId, new_source: null })
 		}
@@ -259,6 +265,17 @@ class GraphGen extends React.Component {
 	};
 
 	loadNetwork = (event) => {
+
+		this.state.links.forEach(link => {
+			let lName = "marker-" + link.source + "," + link.target
+			let l = document.getElementById(lName);
+			if (l !== undefined && l !== null) {
+				console.log(lName + " removed")
+				l.remove();
+			}
+	
+		})
+
 		new Response(event.target.files[0]).json().then(json => {
 
 			data.nodes = json.nodes
@@ -280,14 +297,22 @@ class GraphGen extends React.Component {
 				bidirected: false,
 				popover: false,
 			})
+
+			for (let i = 0; i < this.state.links.length; i++) {
+				if ( this.state.links[i].isReverseEdge) continue;
+				this.createMarkerLink(this.state.links[i], this.state.links);
+			}
+
 		});
 
+
 		this.forceUpdate()
+	
 
 	}
 
 	removeNode = (nodeId) => {
-		let idx = this.state.nodes.findIndex(n => n.id == nodeId);
+		let idx = this.state.nodes.findIndex(n => n.id === nodeId);
 		let node = this.state.nodes[idx];
 		if (!node.isFake && this.state.breakPoints.length > 0) {
 			window.alert("Editing a link, can't remove Nodes")
@@ -297,19 +322,19 @@ class GraphGen extends React.Component {
 		if (node.isFake) {
 			//remove node
 
-			let fakeIdx = this.state.breakPoints.findIndex(n => n.id == nodeId);
+			let fakeIdx = this.state.breakPoints.findIndex(n => n.id === nodeId);
 			this.state.breakPoints.splice(fakeIdx, 1);
 			this.state.nodes.splice(idx, 1);
 
 			//remove links
 			let links = this.state.links
 
-			let tIdx = links.findIndex(l => l.target == nodeId)
+			let tIdx = links.findIndex(l => l.target === nodeId)
 			let tLink = links.splice(tIdx, 1);
-			let sIdx = links.findIndex(l => l.source == nodeId)
+			let sIdx = links.findIndex(l => l.source === nodeId)
 
 			console.log(tIdx + " " + sIdx)
-			if (sIdx != -1) {
+			if (sIdx !== -1) {
 				let sLink = links.splice(sIdx, 1);
 				//let t = this.state.nodes.find(n => n.id == sLink[0].target);
 
@@ -340,21 +365,21 @@ class GraphGen extends React.Component {
 						<button onClick={onClose}>No</button>
 						<button
 							onClick={() => {
-								for (var i = 0; i < this.state.nodes.length; i++) {
+								for (let i = 0; i < this.state.nodes.length; i++) {
 									if (this.state.nodes[i].id === nodeId) {
 										this.state.nodes.splice(i, 1)
 										break;
 									}
 								}
 
-								for (var i = 0; i < this.state.links.length; i++) {
+								for (let i = 0; i < this.state.links.length; i++) {
 									let link = this.state.links[i];
 									if (link.source === nodeId || link.target === nodeId) {
 
-										let lName = link.source + "," + link.target
+										let lName = "marker-" + link.source + "," + link.target
 										let l = document.getElementById(lName);
 										if (l !== undefined && l !== null) { l.remove(); }
-										lName = link.target + "," + link.source
+										lName = "marker-" + link.target + "," + link.source
 										l = document.getElementById(lName);
 										if (l !== undefined && l !== null) { l.remove(); }
 
@@ -388,11 +413,11 @@ class GraphGen extends React.Component {
 		let { source, target } = link_selected;
 		let links = this.state.links
 
-		let idx = links.findIndex(l => l.source == source && l.target == target)
+		let idx = links.findIndex(l => l.source === source && l.target === target)
 
 		let link = links[idx];
 
-		let lName = link.source + "," + link.target
+		let lName = "marker-" + link.source + "," + link.target
 		let l = document.getElementById(lName);
 		if (l !== undefined && l !== null) {
 			l.remove();
@@ -403,18 +428,11 @@ class GraphGen extends React.Component {
 		let bidirected = false;
 
 		if (removed[0].directed) {
-			let idx = links.findIndex(l => l.source == target && l.target == source)
-			if (idx != -1) {
+			let idx = links.findIndex(l => l.source === target && l.target === source)
+			if (idx !== -1) {
 				links.splice(idx, 1); bidirected = true;
 			}
 		}
-
-		/* for (let i = 0; i < this.state.links.length; i++) {
-			if (this.state.links[i].source == source && this.state.links[i].target == target) {
-				this.state.links.splice(i, 1);
-				break;
-			}
-		} */
 
 		this.setState({
 			menu: false,
@@ -437,7 +455,7 @@ class GraphGen extends React.Component {
 
 
 		if (!nodes[idx].isBlock) {
-			let idxPos = nodes.findIndex(n => n.x == fx && n.y == fy && !n.isBlock)
+			let idxPos = nodes.findIndex(n => n.x === fx && n.y === fy && !n.isBlock)
 
 			fx = (idxPos === -1) ? fx : nodes[idx].x
 			fy = (idxPos === -1) ? fy : nodes[idx].y
@@ -470,10 +488,10 @@ class GraphGen extends React.Component {
 		value = value.replace(/\s/g, '');
 		const idx = this.state.nodes.findIndex(node => node.id === value)
 		console.log(idx);
-		if (idx == -1) {
+		if (idx === -1) {
 
 			const idx = this.state.nodes.findIndex(node => node.id === old_val);
-			if (idx == -1) {
+			if (idx === -1) {
 				window.alert("Rename Error val: " + value + " \n oldval: " + old_val);
 				return;
 			}
@@ -486,9 +504,9 @@ class GraphGen extends React.Component {
 					if (link.source === old_val) { link.source = value; }
 					else if (link.target === old_val) {
 						link.target = value;
-						let lName = link.source + "," + old_val;
+						let lName = "marker-" + link.source + "," + old_val;
 						let l = document.getElementById(lName);
-						lName = link.source + "," + value;
+						lName = "marker-" + link.source + "," + value;
 						l.id = lName;
 					}
 				}
@@ -518,8 +536,8 @@ class GraphGen extends React.Component {
 			canvas_y = Math.round(canvas_y / 20) * 20 //+ 7.5
 		}
 
-		let check = this.state.breakPoints.findIndex(n => n.fx == canvas_x && n.fy == canvas_y);
-		if (check != -1) { console.log("No breakpoint on same position"); return };
+		let check = this.state.breakPoints.findIndex(n => n.fx === canvas_x && n.fy === canvas_y);
+		if (check !== -1) { console.log("No breakpoint on same position"); return };
 
 		let newFakeId = 0;
 		this.state.breakPoints.forEach(
@@ -542,7 +560,7 @@ class GraphGen extends React.Component {
 		})
 
 		let lastIdx = this.state.breakPoints.length - 1;
-		if (lastIdx == 0)
+		if (lastIdx === 0)
 			this.state.links.push(
 				{
 					source: this.state.new_link.source,
@@ -553,7 +571,7 @@ class GraphGen extends React.Component {
 
 		else {
 
-			let linkIdx = this.state.links.findIndex(l => l.source == this.state.breakPoints[lastIdx - 1].id)
+			let linkIdx = this.state.links.findIndex(l => l.source === this.state.breakPoints[lastIdx - 1].id)
 			if (linkIdx !== -1) this.state.links.splice(linkIdx, 1);
 			this.state.links.push(
 				{
@@ -571,9 +589,8 @@ class GraphGen extends React.Component {
 	breakpointHandler = (evt) => {
 		//calcute coordinate on svg
 
-		console.log("GRAPH CLICK")
-		if (this.state.new_link == null) {
-			this.state.breakPoints = []
+		if (this.state.new_link === null) {
+			this.setState({ breakPoints: [] });
 			return;
 		}
 
@@ -671,11 +688,16 @@ class GraphGen extends React.Component {
 
 
 		let { source, target } = link;
+		
+		this.setState({
+			new_link: links.find(l => l.source === source && l.target === target),
+		})
 
-		let idx = links.findIndex(l => l.source == source && l.target == target)
-		this.state.new_link = links[idx];
 
-		this.state.bidirected = this.removeLink(link);
+		this.setState({ 
+			bidirected: this.removeLink(link),
+		})
+
 
 		console.log(source + " " + target);
 		console.log(link);
@@ -683,7 +705,7 @@ class GraphGen extends React.Component {
 		document.getElementById("save").disabled = true;
 		document.getElementById("load").disabled = true;
 
-		if (link.breakPoints.length == 0) {
+		if (link.breakPoints.length === 0) {
 
 			return;
 		}
@@ -862,15 +884,15 @@ class GraphGen extends React.Component {
 	onChangeDirected = (directed, link) => {
 		let { source, target } = link;
 
-		let idx = this.state.links.findIndex(l => l.source == source && l.target == target)
+		let idx = this.state.links.findIndex(l => l.source === source && l.target === target)
 
 		let links = this.state.links;
 		console.log(directed)
 		switch (directed) {
 			case "0":
 			case "1": {
-				let idxToRemove = links.findIndex(l => l.source == target && l.target == source)
-				if (idxToRemove != -1) {
+				let idxToRemove = links.findIndex(l => l.source === target && l.target === source)
+				if (idxToRemove !== -1) {
 					console.log(links.splice(idxToRemove, 1));
 					console.log(link)
 				}
@@ -882,7 +904,6 @@ class GraphGen extends React.Component {
 				console.log("Created other edge")
 				var bp = [...link.breakPoints];
 				let l = links[idx];
-				console.log(bp)
 
 				let new_link = {
 					source: target, target: source, directed: true,
@@ -893,13 +914,15 @@ class GraphGen extends React.Component {
 				}
 
 				links.unshift(new_link)
+				break;	
+			}
+			default: {
+				console.log("Unexpected value");
+				break;
 			}
 		}
 
 		link.directed = (directed != 0);
-
-		console.log(links)
-		console.log(directed != 0)
 		this.setState({ links: links })
 
 
@@ -908,7 +931,7 @@ class GraphGen extends React.Component {
 	updateConnection = (value, link) => {
 		let links = this.state.links;
 
-		let idx = links.findIndex(l => l.source == link.source && l.target == link.target);
+		let idx = links.findIndex(l => l.source === link.source && l.target === link.target);
 		if (idx !== -1) {
 			let link = links[idx];
 			link.strokeDasharray = (value) ? 3 : 0
@@ -923,7 +946,7 @@ class GraphGen extends React.Component {
 		value = (value > 5) ? 5 : value;
 
 
-		let idx = links.findIndex(l => l.source == link.source && l.target == link.target);
+		let idx = links.findIndex(l => l.source === link.source && l.target === link.target);
 		if (idx !== -1) {
 			let link = links[idx];
 			link.strokeWidth = value
@@ -931,7 +954,7 @@ class GraphGen extends React.Component {
 			let { source, target } = link
 
 			let children = document.getElementById(source).childNodes;
-			if (children.length == 0) return;
+			if (children.length === 0) return;
 			let height = children[0].getAttribute("height");
 			let width = children[0].getAttribute("width");
 			let lName = "marker-" + target + "," + source
@@ -940,7 +963,7 @@ class GraphGen extends React.Component {
 			
 			
 			children = document.getElementById(target).childNodes;
-			if (children.length == 0) return;
+			if (children.length === 0) return;
 			height = children[0].getAttribute("height");
 			width = children[0].getAttribute("width");
 			lName = "marker-" + source + "," + target
@@ -949,8 +972,8 @@ class GraphGen extends React.Component {
 	
 
 			if (link.directed) {
-				let rIdx = links.findIndex(l => l.source == link.target && l.target == link.source);
-				if (rIdx != -1) {
+				let rIdx = links.findIndex(l => l.source === link.target && l.target === link.source);
+				if (rIdx !== -1) {
 					let reverse = links[rIdx]
 					reverse.strokeWidth = value;
 				}
@@ -964,7 +987,7 @@ class GraphGen extends React.Component {
 
 	resize = (node) => {
 		let children = document.getElementById(node.id).childNodes;
-		if (children.length == 0) return;
+		if (children.length === 0) return;
 		let height = children[0].getAttribute("height");
 		let width = children[0].getAttribute("width");
 		let label = children[1];
@@ -978,7 +1001,7 @@ class GraphGen extends React.Component {
 
 			this.state.links.forEach(
 				link => {
-					if (link.target == node.id) {
+					if (link.target === node.id) {
 						let lName = "marker-" + link.source + "," + link.target
 						let l = document.getElementById(lName);
 						l.setAttribute("refX", Math.max(16, Math.sqrt(((height * height) / 4 + (width * width) / 4) / link.strokeWidth)+ 5/link.strokeWidth)) //  /link.strokeWidth
@@ -989,29 +1012,20 @@ class GraphGen extends React.Component {
 		}
 
 		this.setState({ resize: false })
-		console.log(this.state.links)
+		console.log("this.state.links")
 		config.freezeAllDragEvents = false;
 		this.forceUpdate();
 	}
 
 	componentDidMount() {
 		let marker = document.getElementById("marker-small").cloneNode(true);
-		// this.state.nodes.forEach(
-		// 	node => {
-		// 		if (node.isBlock) return;
-		// 		marker.id = "marker-" + node.id
-		// 		document.getElementsByTagName("defs")[0].appendChild(marker)
-		// 	}
-		// )
 
-
-		//TODO: CHECK STROKES WHEN LOAD NETWORK
 		this.state.links.forEach(
 			link => {
 				let lName = link.source + "," + link.target;
 				marker.id = "marker-" + lName;
 				document.getElementsByTagName("defs")[0].appendChild(marker)
-				if (link.directed != null) {
+				if (link.directed !== null) {
 					let l = document.getElementById(lName);
 					link.directed ? l.setAttribute("marker-end", `url(#marker-${lName})`) :
 						l.setAttribute("marker-end", "null")
@@ -1026,11 +1040,11 @@ class GraphGen extends React.Component {
 
 		this.state.links.forEach(
 			link => {
-				if (link.directed != null) {
+				if (link.directed !== null) {
 					let lName = link.source + "," + link.target
 					let l = document.getElementById(lName);
 					link.directed ? l.setAttribute("marker-end", `url(#marker-${lName})`) :
-						l.setAttribute("marker-end", "null")
+					l.setAttribute("marker-end", "null")
 				}
 			}
 		)
@@ -1040,7 +1054,7 @@ class GraphGen extends React.Component {
 	render() {
 
 		const { menu, selected } = this.state;
-		if (this.state.nodes.length == 0) {
+		if (this.state.nodes.length === 0) {
 			this.state.nodes.push({
 				id: "PC" + Math.floor(Math.random() * 10000),
 				fx: 20,
@@ -1084,9 +1098,14 @@ class GraphGen extends React.Component {
 							updateBlockSize={(size) => {
 								console.log(size);
 								console.log(this.state)
-								let idx = this.state.nodes.findIndex(n => n.id == this.state.node_selected);
-								this.state.nodes[idx].size = size;
-								this.setState({ nodes: this.state.nodes })
+								this.setState({
+									nodes: this.state.nodes.map(n => {
+										if (n.id === this.state.node_selected) {
+											n.size = size;
+										}
+										return n;
+									}),
+								})
 							}}
 							closeMenu={() => this.setState({ menu: false })}
 
@@ -1101,7 +1120,7 @@ class GraphGen extends React.Component {
 
 
 					if (link.directed) {
-						let idx = links.findIndex(l => l.source == link.target && l.target == link.source)
+						let idx = links.findIndex(l => l.source === link.target && l.target === link.source)
 						directed = (idx === -1) ? 1 : 2
 					}
 					menuBody = <div style={{ float: "right", width: "20%" }}>
@@ -1138,6 +1157,11 @@ class GraphGen extends React.Component {
 					</div>
 					break;
 				}
+
+				default: {
+					console.log("Unexpected menu value");
+					break;
+				}
 			}
 		}
 		else {
@@ -1156,11 +1180,12 @@ class GraphGen extends React.Component {
 			let node = this.state.nodes.find(n => n.id === this.state.toResize);
 			square = <ResizableSquare
 				node={node}
-				zoom={(this.state.zoom != null) ? this.state.zoom : 1}
+				zoom={(this.state.zoom !== null) ? this.state.zoom : 1}
 				resizeNode={(size) => {
-					let idx = this.state.nodes.findIndex(n => n.id == this.state.toResize);
-					this.state.nodes[idx].size = size;
-					this.setState({ nodes: this.state.nodes })
+					let nodes = this.state.nodes
+					let idx = nodes.findIndex(n => n.id === this.state.toResize);
+					nodes[idx].size = size;
+					this.setState({ nodes: nodes })
 				}}
 				endResize={() => this.resize(node)}
 			/>
@@ -1185,7 +1210,7 @@ class GraphGen extends React.Component {
 					/> </Button>
 					<Stack direction={'row'}><Legend /><Tips /></Stack>
 					<FormControlLabel id='grid-mod' control={<Switch onChange={(_event, checked) => {
-						this.state.isGridModeOn = checked;
+						this.setState({ isGridModeOn: checked })
 						if (checked)
 							this.discretization();
 					}} />}
@@ -1223,7 +1248,7 @@ class GraphGen extends React.Component {
 						onClickLink={(source, target) => {
 							toast("ClickLink triggered: (" + source + ", " + target + ")", { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
 
-							if (this.state.breakPoints.length == 0) {
+							if (this.state.breakPoints.length === 0) {
 								let link = this.state.links.find(l => l.source === source && l.target === target);
 
 								if (link.isReverseEdge) return;
@@ -1244,7 +1269,7 @@ class GraphGen extends React.Component {
 						}}
 						onMouseOverNode={(id) => {
 							// toast("MouseOver triggered " + id, { pauseOnHover: false, closeOnClick: true, autoClose: 2000})
-							let over = this.state.nodes.find(n => n.id == id)
+							let over = this.state.nodes.find(n => n.id === id)
 							if (over === undefined) return
 							this.setState({ target: over, popover: true })
 						}}
@@ -1256,7 +1281,7 @@ class GraphGen extends React.Component {
 							evt.preventDefault(); this.setState(this.state.contextMenu === null
 								? {
 									targetType: "Node",
-									target: this.state.nodes.find(n => n.id == nodeID),
+									target: this.state.nodes.find(n => n.id === nodeID),
 									contextMenu: {
 										mouseX: evt.clientX - 3,
 										mouseY: evt.clientY - 5,
@@ -1269,7 +1294,7 @@ class GraphGen extends React.Component {
 							toast("RightClickLink triggered: (" + source + ", " + target + ")", { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
 							evt.preventDefault();
 
-							let t = this.state.links.find(l => l.source == source && l.target == target)
+							let t = this.state.links.find(l => l.source === source && l.target === target)
 							if (t.isFake || t.isReverseEdge) return;
 
 							this.setState(this.state.contextMenu === null

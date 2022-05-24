@@ -113,7 +113,7 @@ class NodeMenu extends React.Component {
         let nodes = []
         neighborhood.forEach(link => {
             let { source, target } = link;
-            if (link.isReturnEdge) return;
+            if (link.isReverseEdge) return;
             let nodeId = source !== this.props.node ? source : target;
             let node = this.props.nodes.find(n => n.id === nodeId);
 
