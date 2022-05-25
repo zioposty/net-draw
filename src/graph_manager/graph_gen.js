@@ -587,17 +587,12 @@ class GraphGen extends React.Component {
 	}
 
 	breakpointHandler = (evt) => {
-		//calcute coordinate on svg
-
-		if (this.state.new_link === null) {
-			this.setState({ breakPoints: [] });
-			return;
-		}
-
+		
 		document.getElementById("save").disabled = true;
 		document.getElementById("load").disabled = true;
-
-
+		
+		
+		//calcute coordinate on svg
 		var { canvas_x, canvas_y } = this.calculatePosition(evt);
 
 		this.createFakeNode(canvas_x, canvas_y)
@@ -1251,7 +1246,7 @@ class GraphGen extends React.Component {
 							if (this.state.breakPoints.length === 0) {
 								let link = this.state.links.find(l => l.source === source && l.target === target);
 
-								if (link.isReverseEdge) return;
+								if (link.isReverseEdge)  link = this.state.links.find(l => l.source === target && l.target === source);
 
 								this.setState({
 									menu: true, selected: 2,
@@ -1275,7 +1270,13 @@ class GraphGen extends React.Component {
 						}}
 						onMouseOutNode={(_id) => { if (this.state.popover) this.setState({ popover: false }) }}
 						onNodePositionChange={(nodeId, fx, fy) => this.onNodePositionChange(nodeId, fx, fy)}
-						onClickGraph={evt => { this.breakpointHandler(evt) }}
+						onClickGraph={evt => { 
+							if (this.state.new_link === null) {
+								this.setState({ breakPoints: [] });
+								this.setState({ menu: false, selected: 0 });
+							} else { this.breakpointHandler(evt) }
+							}
+						}
 						onRightClickNode={(evt, nodeID, _node) => {
 							toast("RightClickNode triggered " + nodeID, { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
 							evt.preventDefault(); this.setState(this.state.contextMenu === null
