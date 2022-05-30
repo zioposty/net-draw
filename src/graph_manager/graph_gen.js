@@ -338,14 +338,16 @@ class GraphGen extends React.Component {
 				let sLink = links.splice(sIdx, 1);
 				//let t = this.state.nodes.find(n => n.id == sLink[0].target);
 
-				let link = {
-					source: tLink[0].source,
-					target: sLink[0].target,
-					isFake: true
+				
+				if (this.state.nodes.find(n => n.id ==  tLink[0].source).isFake ||
+					this.state.nodes.find(n => n.id ==  sLink[0].target).isFake) {
+					let link = {
+						source: tLink[0].source,
+						target: sLink[0].target,
+						isFake: true,
+					}
+					links.push(link)
 				}
-
-				console.log(link)
-				links.push(link)
 			}
 
 			this.setState({
@@ -1277,19 +1279,19 @@ class GraphGen extends React.Component {
 							} else { this.breakpointHandler(evt) }
 							}
 						}
-						onRightClickNode={(evt, nodeID, _node) => {
+						onRightClickNode={(evt, nodeID, node) => {
 							toast("RightClickNode triggered " + nodeID, { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
-							evt.preventDefault(); this.setState(this.state.contextMenu === null
+							evt.preventDefault();
+							this.setState(this.state.contextMenu === null
 								? {
 									targetType: "Node",
-									target: this.state.nodes.find(n => n.id === nodeID),
+									target: node,
 									contextMenu: {
 										mouseX: evt.clientX - 3,
 										mouseY: evt.clientY - 5,
 									}
 								}
 								: { contextMenu: null });
-							console.log(this.state);
 						}}
 						onRightClickLink={(evt, source, target) => {
 							toast("RightClickLink triggered: (" + source + ", " + target + ")", { pauseOnHover: false, closeOnClick: true, autoClose: 2000 })
@@ -1330,8 +1332,8 @@ class GraphGen extends React.Component {
 					<NodeContextMenu contextMenu={this.state.contextMenu}
 						target={this.state.target}
 						targetType={this.state.targetType}
-						removeNode={() => { this.setState({ contextMenu: null }); this.removeNode(this.state.target.id) }}
 						contextClose={() => this.setState({ contextMenu: null })}
+						removeNode={() => { this.setState({ contextMenu: null }); this.removeNode(this.state.target.id) }}
 						toResize={(id) => { this.setState({ toResize: id }) }}
 						drawSquare={() => {
 							this.setState({ resize: true });

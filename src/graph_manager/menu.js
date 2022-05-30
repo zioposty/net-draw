@@ -21,32 +21,15 @@ class AllNodesList extends React.Component {
     constructor(props) {
         super(props)
         this.state = { value: props.node };
-        this.handleChange = this.handleChange.bind(this);
-        this.escFunction = this.escFunction.bind(this);
     }
-
-    handleChange(event) {
-        this.setState({ value: event.target.value });
-    }
-
-    escFunction(event) {
-        if (event.keyCode === 27) {
-            this.props.closeMenu();
-        }
-    }
-    componentDidMount() {
-        document.addEventListener("keydown", this.escFunction, false);
-    }
-    componentWillUnmount() {
-        document.removeEventListener("keydown", this.escFunction, false);
-    }
-
+    
     createList = () => {
         let nodes = this.props.nodes;
         console.log(nodes)
         let allNodes = []
         nodes.forEach(node => {
-
+            if (node.isFake) return;
+    
             allNodes.push(
                 <ListItem key={"listitem-" + node.id} onDoubleClick={() => { this.props.clickNode(node.id) }}
                     style={{ cursor: 'pointer' }}>

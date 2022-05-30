@@ -24,6 +24,9 @@ class NodeContextMenu extends React.Component {
         <MenuItem onClick={this.props.contextClose}> <b>{(this.props.contextMenu !== null) ? this.props.target.id : undefined}</b></MenuItem>
         <MenuItem onClick={this.props.removeNode}>Remove</MenuItem>
         <MenuItem onClick={() => {
+          if(this.props.target.isFake) {
+            return;
+          }
           this.props.contextClose();
           this.props.toResize(this.props.target.id);
           this.props.drawSquare()
